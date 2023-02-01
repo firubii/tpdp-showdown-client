@@ -3,7 +3,7 @@ TPDP Showdown Client
 
 A WIP fork of the Pokémon Showdown Client for Touhou Puppet Dance Performance. The fork for the server itself, which contains the game data, can be found [here](https://github.com/firubii/tpdp-showdown).
 
-The webpage portion of the client is modified to support TPDP-specific things such as Puppet costumes, the 130 EV and 15 IV caps, positive-only natures, and multiple statuses at once.
+The webpage portion of the client is modified to support TPDP-specific things such as Puppet costumes, the 130 EV and 15 IV caps, positive-only natures, and multiple statuses at once. The battle panel has also been modified to look more in-line with Touhou Puppet Dance Performance.
 
 (original README.md):
 
