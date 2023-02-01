@@ -3115,6 +3115,7 @@ export class Battle {
 		let splitDetails = details.split(', ');
 		if (splitDetails[splitDetails.length - 1].startsWith('tera:')) {
 			output.terastallized = splitDetails[splitDetails.length - 1].slice(5);
+		}
 		if (splitDetails[splitDetails.length - 1].startsWith('C')) {
 			output.costume = parseInt(splitDetails[splitDetails.length - 1].substr(1));
 			splitDetails.pop();
