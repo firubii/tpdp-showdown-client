@@ -36,6 +36,154 @@ This license DOES NOT extend to any other files in this repository.
 
 */
 
+const BGMInfo = [
+	{
+		name: "extbossB",
+		loopStart: 520438,
+		loopEnd: 6494447,
+	},
+	{
+		name: "ryouikiB",
+		loopStart: 529200,
+		loopEnd: 3836700,
+	},
+	{
+		name: "yumemiB",
+		loopStart: 747106,
+		loopEnd: 7969129,
+	},
+	{
+		name: "okinaB",
+		loopStart: 498000,
+		loopEnd: 5541888,
+	},
+	{
+		name: "extendedB",
+		loopStart: 371991,
+		loopEnd: 5848718,
+	},
+	{
+		name: "kyuuYB",
+		loopStart: 326666,
+		loopEnd: 3527996,
+	},
+	{
+		name: "kyuuB",
+		loopStart: 311294,
+		loopEnd: 3797786,
+	},
+	{
+		name: "furannB",
+		loopStart: 1593292,
+		loopEnd: 5035941,
+	},
+	{
+		name: "hifuuB",
+		loopStart: 240545,
+		loopEnd: 6314312,
+	},
+	{
+		name: "wildB",
+		loopStart: 969174,
+		loopEnd: 4907404,
+	},
+	{
+		name: "mobB",
+		loopStart: 352800,
+		loopEnd: 6997193,
+	},
+	{
+		name: "uniqueB",
+		loopStart: 470400,
+		loopEnd: 4468795,
+	},
+	{
+		name: "bossB",
+		loopStart: 529200,
+		loopEnd: 6879600,
+	},
+	{
+		name: "nksB1",
+		loopStart: 200962,
+		loopEnd: 3416356,
+	},
+	{
+		name: "nksB2",
+		loopStart: 135692,
+		loopEnd: 5156303,
+	},
+	{
+		name: "nksB3",
+		loopStart: 264071,
+		loopEnd: 7940464,
+	},
+	{
+		name: "nksB4",
+		loopStart: 124518,
+		loopEnd: 10615124,
+	},
+	{
+		name: "reimuB",
+		loopStart: 743212,
+		loopEnd: 12359808,
+	},
+	{
+		name: "marisaB",
+		loopStart: 246139,
+		loopEnd: 5291997,
+	},
+	{
+		name: "makaiB",
+		loopStart: 267949,
+		loopEnd: 8842334,
+	},
+	{
+		name: "lastB",
+		loopStart: 1117301,
+		loopEnd: 19199814,
+	},
+	{
+		name: "wildMoriB",
+		loopStart: 669874,
+		loopEnd: 3885268,
+	},
+	{
+		name: "wildDoukutuB",
+		loopStart: 255036,
+		loopEnd: 3506749,
+	},
+	{
+		name: "wildYamaB",
+		loopStart: 580830,
+		loopEnd: 3162296,
+	},
+	{
+		name: "mugensimaiB",
+		loopStart: 979999,
+		loopEnd: 7578659,
+	},
+	{
+		name: "seijaB",
+		loopStart: 176913,
+		loopEnd: 5345840,
+	},
+	{
+		name: "wildKanjuB",
+		loopStart: 137140,
+		loopEnd: 4267485,
+	},
+	{
+		name: "yukariB",
+		loopStart: 738418,
+		loopEnd: 4553579,
+	},
+	{
+		name: "butokaiB",
+		loopStart: 180409,
+		loopEnd: 6900646,
+	},
+];
+
 export class BattleScene implements BattleSceneStub {
 	battle: Battle;
 	animating = true;
@@ -148,7 +296,7 @@ export class BattleScene implements BattleSceneStub {
 		this.$battle = $('<div class="innerbattle"></div>');
 		this.$frame.append(this.$battle);
 
-		this.$bg = $('<div class="backdrop" style="background-image:url(' + Dex.resourcePrefix + this.backdropImage + ');display:block;opacity:0.8"></div>');
+		this.$bg = $('<div class="backdrop pixelated" style="background-image:url(' + Dex.resourcePrefix + this.backdropImage + ');background-size:100%;background-position-y:-30px;background-position-x:30px;display:block;opacity:0.8"></div>');
 		this.$terrain = $('<div class="weather"></div>');
 		this.$weather = $('<div class="weather"></div>');
 		this.$bgEffect = $('<div></div>');
@@ -342,13 +490,13 @@ export class BattleScene implements BattleSceneStub {
 
 		let left = 210;
 		let top = 245;
-		let scale = (obj.gen === 5
+		let scale = 2;/*(obj.gen === 5
 			? 2.0 - ((loc.z!) / 200)
-			: 1.5 - 0.5 * ((loc.z!) / 200));
+			: 1.5 - 0.5 * ((loc.z!) / 200));*/
 		if (scale < .1) scale = .1;
 
 		left += (410 - 190) * ((loc.z!) / 200);
-		top += (135 - 245) * ((loc.z!) / 200);
+		top += (135 - 245); //* ((loc.z!) / 200);
 		left += Math.floor(loc.x! * scale);
 		top -= Math.floor(loc.y! * scale /* - loc.x * scale / 4 */);
 		let width = Math.floor(obj.w * scale * loc.xscale!);
@@ -356,6 +504,7 @@ export class BattleScene implements BattleSceneStub {
 		let hoffset = Math.floor((obj.h - (obj.y || 0) * 2) * scale * loc.yscale!);
 		left -= Math.floor(width / 2);
 		top -= Math.floor(hoffset / 2);
+		top += 83; //Manual adjustment for TPDP
 
 		let pos: JQuery.PlainObject = {
 			left,
@@ -576,7 +725,8 @@ export class BattleScene implements BattleSceneStub {
 			else if (gen <= 3) bg = 'fx/' + BattleBackdropsThree[this.numericId % BattleBackdropsThree.length] + '?';
 			else if (gen <= 4) bg = 'fx/' + BattleBackdropsFour[this.numericId % BattleBackdropsFour.length];
 			else if (gen <= 5) bg = 'fx/' + BattleBackdropsFive[this.numericId % BattleBackdropsFive.length];
-			else bg = 'sprites/gen6bgs/' + BattleBackdrops[this.numericId % BattleBackdrops.length];
+			//else bg = 'sprites/gen6bgs/' + BattleBackdrops[this.numericId % BattleBackdrops.length];
+			else bg = 'sprites/bgs/' + BattleBackdrops[this.numericId % BattleBackdrops.length];
 		}
 
 		this.backdropImage = bg;
@@ -600,9 +750,12 @@ export class BattleScene implements BattleSceneStub {
 			if (pokemon.hp !== pokemon.maxhp) {
 				statustext += pokemon.getHPText();
 			}
-			if (pokemon.status) {
+			
+			if (pokemon.status && pokemon.status.length > 0) {
 				if (statustext) statustext += '|';
-				statustext += pokemon.status;
+				for (let i = 0; i < pokemon.status.length; i++) {
+					statustext += PokemonSprite.getStatusName(pokemon.status[i]);
+				}
 			}
 			if (statustext) {
 				name += ' (' + statustext + ')';
@@ -813,6 +966,7 @@ export class BattleScene implements BattleSceneStub {
 					gen: this.gen,
 					noScale: true,
 					mod: this.mod,
+					costume: pokemon.costume,
 				});
 				let y = 0;
 				let x = 0;
@@ -829,9 +983,9 @@ export class BattleScene implements BattleSceneStub {
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
 				buf += '<img src="' + url + '" width="' + spriteData.w + '" height="' + spriteData.h + '" style="position:absolute;top:' + Math.floor(y - spriteData.h / 2) + 'px;left:' + Math.floor(x - spriteData.w / 2) + 'px" />';
 				buf2 += '<div style="position:absolute;top:' + (y + 45) + 'px;left:' + (x - 40) + 'px;width:80px;font-size:10px;text-align:center;color:#FFF;">';
-				const gender = pokemon.gender;
-				if (gender === 'M' || gender === 'F') {
-					buf2 += `<img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" style="margin-bottom:-1px" /> `;
+				const puppetStyle = pokemon.getSpecies().name.split(' ')[0].toLowerCase();
+				if (['assist', 'defense', 'extra', 'normal', 'power', 'speed'].includes(puppetStyle)) {
+					buf2 += ` <img src="${Dex.resourcePrefix}sprites/styles/${puppetStyle}.png" alt="${pokemon.getSpecies().name.split(' ')[0]}" width="16" height="16" class="pixelated" />`;
 				}
 				if (pokemon.level !== 100) {
 					buf2 += '<span style="text-shadow:#000 1px 1px 0,#000 1px -1px 0,#000 -1px 1px 0,#000 -1px -1px 0"><small>L</small>' + pokemon.level + '</span>';
@@ -1061,6 +1215,7 @@ export class BattleScene implements BattleSceneStub {
 		const sprite = new PokemonSprite(Dex.getSpriteData(pokemon, pokemon.side.isFar, {
 			gen: this.gen,
 			mod: this.mod,
+			costume: pokemon.costume,
 		}), {
 			x: pokemon.side.x,
 			y: pokemon.side.y,
@@ -1542,17 +1697,17 @@ export class BattleScene implements BattleSceneStub {
 			const url = BattleEffects[i].url;
 			if (url) this.preloadImage(url);
 		}
-		this.preloadImage(Dex.resourcePrefix + 'sprites/ani/substitute.gif');
-		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.gif');
+		this.preloadImage(Dex.resourcePrefix + 'sprites/ani/substitute.png');
+		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.png');
 	}
 	rollBgm() {
-		this.setBgm(1 + this.numericId % 15);
+		this.setBgm(Math.floor(Math.random() * BGMInfo.length));
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
 		this.bgmNum = bgmNum;
 
-		switch (bgmNum) {
+		/*switch (bgmNum) {
 		case -1:
 			this.bgm = BattleSound.loadBgm('audio/bw2-homika-dogars.mp3', 1661, 68131, this.bgm);
 			break;
@@ -1611,7 +1766,10 @@ export class BattleScene implements BattleSceneStub {
 		default:
 			this.bgm = BattleSound.loadBgm('audio/sm-rival.mp3', 11389, 62158, this.bgm);
 			break;
-		}
+		}*/
+
+		let info = BGMInfo[bgmNum];
+		this.bgm = BattleSound.loadBgm('audio/' + info.name +'.mp3', info.loopStart, info.loopEnd, this.bgm);
 
 		this.updateBgm();
 	}
@@ -1747,6 +1905,16 @@ export class Sprite {
 export class PokemonSprite extends Sprite {
 	// HTML strings are constructed from this table and stored back in it to cache them
 	protected static statusTable: {[id: string]: [string, 'good' | 'bad' | 'neutral'] | null | string} = {
+		//TPDP
+		stancebreak: ['Stance Break', 'bad'],
+		amnesia: ['Amnesia', 'bad'],
+		claim: ['Claim', 'bad'],
+		upbeat: ['Upbeat', 'bad'],
+		callofthedead: ['Call of the Dead', 'good'],
+		blackhole: ['Black Hole', 'good'],
+		magicbarrier: null,
+
+		//Pokemon
 		formechange: null,
 		typechange: null,
 		typeadd: null,
@@ -2069,6 +2237,7 @@ export class PokemonSprite extends Sprite {
 			this.sp = Dex.getSpriteData(pokemon, this.isFrontSprite, {
 				gen: this.scene.gen,
 				mod: this.scene.mod,
+				costume: pokemon.costume,
 			});
 		} else if (this.oldsp) {
 			this.sp = this.oldsp;
@@ -2176,13 +2345,13 @@ export class PokemonSprite extends Sprite {
 			if (!this.isFrontSprite) statbarOffset = -7 * slot;
 			if (this.isFrontSprite && moreActive === 2) statbarOffset = 14 * slot - 10;
 		}
-		if (this.scene.gen <= 2) {
+		/*if (this.scene.gen <= 2) {
 			statbarOffset += this.isFrontSprite ? 20 : 1;
 		} else if (this.scene.gen <= 3) {
 			statbarOffset += this.isFrontSprite ? 30 : 5;
 		} else if (this.scene.gen !== 5) {
 			statbarOffset += this.isFrontSprite ? 30 : 20;
-		}
+		}*/
 
 		let pos = this.scene.pos({
 			x: this.x,
@@ -2197,7 +2366,7 @@ export class PokemonSprite extends Sprite {
 		this.left = pos.left;
 		this.top = pos.top;
 		this.statbarLeft = pos.left - 80;
-		this.statbarTop = pos.top - 73 - statbarOffset;
+		this.statbarTop = 100; //pos.top - 73 - statbarOffset;
 		if (this.statbarTop < -4) this.statbarTop = -4;
 
 		if (moreActive) {
@@ -2219,7 +2388,7 @@ export class PokemonSprite extends Sprite {
 			this.$el.css('display', 'block');
 			this.animReset();
 			this.resetStatbar(pokemon);
-			if (pokemon.hasVolatile('substitute' as ID)) this.animSub(true);
+			if (pokemon.hasVolatile('substitute' as ID) || pokemon.hasVolatile('magicbarrier' as ID)) this.animSub(true);
 			return;
 		}
 		if (this.cryurl) {
@@ -2269,7 +2438,7 @@ export class PokemonSprite extends Sprite {
 		if (this.sp.shiny && this.scene.acceleration < 2) BattleOtherAnims.shiny.anim(this.scene, [this]);
 		this.scene.waitFor(this.$el);
 
-		if (pokemon.hasVolatile('substitute' as ID)) {
+		if (pokemon.hasVolatile('substitute' as ID) || pokemon.hasVolatile('magicbarrier' as ID)) {
 			this.animSub(true, true);
 			this.$sub!.css(this.scene.pos({
 				x: this.x,
@@ -2469,6 +2638,7 @@ export class PokemonSprite extends Sprite {
 		let sp = Dex.getSpriteData(pokemon, this.isFrontSprite, {
 			gen: this.scene.gen,
 			mod: this.scene.mod,
+			costume: pokemon.costume,
 		});
 		let oldsp = this.sp;
 		if (isPermanent) {
@@ -2477,6 +2647,7 @@ export class PokemonSprite extends Sprite {
 				this.oldsp = Dex.getSpriteData(pokemon, this.isFrontSprite, {
 					gen: this.scene.gen,
 					mod: this.scene.mod,
+					costume: pokemon.costume,
 					dynamax: false,
 				});
 			} else {
@@ -2578,7 +2749,7 @@ export class PokemonSprite extends Sprite {
 			return;
 		}
 		const spriten = +this.isFrontSprite;
-		if (id === 'substitute' || id === 'shedtail') {
+		if (id === 'substitute' || id === 'shedtail' || id === 'magicbarrier') {
 			this.animSub(instant);
 		} else if (id === 'leechseed') {
 			const pos1 = {
@@ -2637,7 +2808,7 @@ export class PokemonSprite extends Sprite {
 
 	removeEffect(id: ID, instant?: boolean) {
 		if (id === 'formechange') this.removeTransform();
-		if (id === 'substitute') this.animSubFade(instant);
+		if (id === 'substitute' || id === 'magicbarrier') this.animSubFade(instant);
 		if (this.effects[id]) {
 			for (const sprite of this.effects[id]) sprite.destroy();
 			delete this.effects[id];
@@ -2677,9 +2848,9 @@ export class PokemonSprite extends Sprite {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
-		const gender = pokemon.gender;
-		if (gender === 'M' || gender === 'F') {
-			buf += ` <img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" />`;
+		const puppetStyle = pokemon.getSpecies().name.split(' ')[0].toLowerCase();
+		if (['assist', 'defense', 'extra', 'normal', 'power', 'speed'].includes(puppetStyle)) {
+			buf += ` <img src="${Dex.resourcePrefix}sprites/styles/${puppetStyle}.png" alt="${pokemon.getSpecies().name.split(' ')[0]}" width="16" height="16" class="pixelated" />`;
 		}
 		buf += (pokemon.level === 100 ? `` : ` <small>L${pokemon.level}</small>`);
 
@@ -2754,18 +2925,9 @@ export class PokemonSprite extends Sprite {
 			else $prevhp.addClass('prevhp-yellow prevhp-red');
 		}
 		let status = '';
-		if (pokemon.status === 'brn') {
-			status += '<span class="brn">BRN</span> ';
-		} else if (pokemon.status === 'psn') {
-			status += '<span class="psn">PSN</span> ';
-		} else if (pokemon.status === 'tox') {
-			status += '<span class="psn">TOX</span> ';
-		} else if (pokemon.status === 'slp') {
-			status += '<span class="slp">SLP</span> ';
-		} else if (pokemon.status === 'par') {
-			status += '<span class="par">PAR</span> ';
-		} else if (pokemon.status === 'frz') {
-			status += '<span class="frz">FRZ</span> ';
+		for (let i = 0; i < pokemon.status.length; i++) {
+			status += '<img src="' + Dex.resourcePrefix + 'sprites/statuses/' + encodeURIComponent(pokemon.status[i]) + '.png" alt="' + PokemonSprite.getStatusName(pokemon.status[i]) + '" class="pixelated" /> ';
+			//status += '<span class="' + pokemon.status[i] + '">' + PokemonSprite.getStatusName(pokemon.status[i]) + '</span> ';
 		}
 		if (pokemon.terastallized) {
 			status += `<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(pokemon.terastallized)}.png" alt="${pokemon.terastallized}" class="pixelated" /> `;
@@ -2797,6 +2959,47 @@ export class PokemonSprite extends Sprite {
 		}
 		let statusbar = this.$statbar.find('.status');
 		statusbar.html(status);
+	}
+
+	//Move this somewhere better later
+	public static getStatusName(id: string) {
+		let statusName:string = id;
+		switch (id) {
+			case 'brn':
+				statusName = "BURN";
+				break;
+			case 'psn':
+				statusName = "POIS";
+				break;
+			case 'fear':
+				statusName = "FEAR";
+				break;
+			case 'dark':
+				statusName = "DARK";
+				break;
+			case 'par':
+				statusName = "PARA";
+				break;
+			case 'weak':
+				statusName = "WEAK";
+				break;
+			case 'brnheavy':
+				statusName = "HEAVY BURN";
+				break;
+			case 'tox':
+				statusName = "HEAVY POIS";
+				break;
+			case 'stp':
+				statusName = "STOPPED";
+				break;
+			case 'shk':
+				statusName = "SHOCKED";
+				break;
+			case 'weakheavy':
+				statusName = "HEAVY WEAK";
+				break;
+		}
+		return statusName;
 	}
 
 	private static getEffectTag(id: string) {
@@ -3164,25 +3367,60 @@ const BattleBackdropsFive = [
 	'bg-route.png',
 ];
 const BattleBackdrops = [
-	'bg-aquacordetown.jpg',
-	'bg-beach.jpg',
-	'bg-city.jpg',
-	'bg-dampcave.jpg',
-	'bg-darkbeach.jpg',
-	'bg-darkcity.jpg',
-	'bg-darkmeadow.jpg',
-	'bg-deepsea.jpg',
-	'bg-desert.jpg',
-	'bg-earthycave.jpg',
-	'bg-elite4drake.jpg',
-	'bg-forest.jpg',
-	'bg-icecave.jpg',
-	'bg-leaderwallace.jpg',
-	'bg-library.jpg',
-	'bg-meadow.jpg',
-	'bg-orasdesert.jpg',
-	'bg-orassea.jpg',
-	'bg-skypillar.jpg',
+	'boti0.png',
+	'butokai0.png',
+	'butokaichitei1.png',
+	'chiireiden1.png',
+	'chikurin1.png',
+	'daisibyo1.png',
+	'dokutsu1.png',
+	'eientei1.png',
+	'genbunosawa0.png',
+	'genmukai0.png',
+	'haikyo1.png',
+	'haison0.png',
+	'haiyokan1.png',
+	'hakugyokuro1.png',
+	'hakugyokurokaidan0.png',
+	'hakurei0.png',
+	'hitozato0.png',
+	'hyosetu1.png',
+	'in1.png',
+	'jigoku1.png',
+	'kanketsusen1.png',
+	'kisinjo1.png',
+	'kisinjogyaku1.png',
+	'komakan1.png',
+	'korinodokutsu1.png',
+	'makai1.png',
+	'mizuumi0.png',
+	'mori1.png',
+	'moriyajinja0.png',
+	'muenzuka0.png',
+	'mugenkan1.png',
+	'mugensekai1.png',
+	'mugensekai20.png',
+	'myorenji1.png',
+	'myorenjiIn1.png',
+	'nitori1.png',
+	'out10.png',
+	'out20.png',
+	'pandemonium1.png',
+	'pandemonium20.png',
+	'saigyoayakasi1.png',
+	'saisi0.png',
+	'sangaku0.png',
+	'sanzunokawa1.png',
+	'sinnreibyonaibu1.png',
+	'sinreibyo0.png',
+	'suzuran0.png',
+	'syakunetsu1.png',
+	'taiyo0.png',
+	'tengunosato0.png',
+	'tenkai0.png',
+	'tosyokan1.png',
+	'tsukinomiyako0.png',
+	'yousitu1.png',
 ];
 
 export const BattleOtherAnims: AnimTable = {

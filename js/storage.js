@@ -752,7 +752,7 @@ Storage.packTeam = function (team) {
 		// ivs
 		var ivs = '|';
 		if (set.ivs) {
-			ivs = '|' + (set.ivs['hp'] === 31 || set.ivs['hp'] === undefined ? '' : set.ivs['hp']) + ',' + (set.ivs['atk'] === 31 || set.ivs['atk'] === undefined ? '' : set.ivs['atk']) + ',' + (set.ivs['def'] === 31 || set.ivs['def'] === undefined ? '' : set.ivs['def']) + ',' + (set.ivs['spa'] === 31 || set.ivs['spa'] === undefined ? '' : set.ivs['spa']) + ',' + (set.ivs['spd'] === 31 || set.ivs['spd'] === undefined ? '' : set.ivs['spd']) + ',' + (set.ivs['spe'] === 31 || set.ivs['spe'] === undefined ? '' : set.ivs['spe']);
+			ivs = '|' + (set.ivs['hp'] === 15 || set.ivs['hp'] === undefined ? '' : set.ivs['hp']) + ',' + (set.ivs['atk'] === 15 || set.ivs['atk'] === undefined ? '' : set.ivs['atk']) + ',' + (set.ivs['def'] === 15 || set.ivs['def'] === undefined ? '' : set.ivs['def']) + ',' + (set.ivs['spa'] === 15 || set.ivs['spa'] === undefined ? '' : set.ivs['spa']) + ',' + (set.ivs['spd'] === 15 || set.ivs['spd'] === undefined ? '' : set.ivs['spd']) + ',' + (set.ivs['spe'] === 15 || set.ivs['spe'] === undefined ? '' : set.ivs['spe']);
 		}
 		if (ivs === '|,,,,,') {
 			buf += '|';
@@ -781,13 +781,16 @@ Storage.packTeam = function (team) {
 			buf += '|';
 		}
 
-		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType) {
+		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType || set.costume) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
 			buf += ',' + (set.teraType || '');
+			buf += ',' + (set.costume || '');
 		}
+
+		//console.log('PACKED: ' + buf);
 	}
 
 	return buf;
@@ -867,12 +870,12 @@ Storage.fastUnpackTeam = function (buf) {
 		if (j !== i) {
 			var ivs = buf.substring(i, j).split(',');
 			set.ivs = {
-				hp: ivs[0] === '' ? 31 : Number(ivs[0]),
-				atk: ivs[1] === '' ? 31 : Number(ivs[1]),
-				def: ivs[2] === '' ? 31 : Number(ivs[2]),
-				spa: ivs[3] === '' ? 31 : Number(ivs[3]),
-				spd: ivs[4] === '' ? 31 : Number(ivs[4]),
-				spe: ivs[5] === '' ? 31 : Number(ivs[5])
+				hp: ivs[0] === '' ? 15 : Number(ivs[0]),
+				atk: ivs[1] === '' ? 15 : Number(ivs[1]),
+				def: ivs[2] === '' ? 15 : Number(ivs[2]),
+				spa: ivs[3] === '' ? 15 : Number(ivs[3]),
+				spd: ivs[4] === '' ? 15 : Number(ivs[4]),
+				spe: ivs[5] === '' ? 15 : Number(ivs[5])
 			};
 		}
 		i = j + 1;
@@ -891,9 +894,9 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 6);
+			if (i < buf.length) misc = buf.substring(i).split(',', 7);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 6);
+			if (i !== j) misc = buf.substring(i, j).split(',', 7);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -902,6 +905,7 @@ Storage.fastUnpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5];
+			set.costume = (misc[6] ? Number(misc[6]) : 0);
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -985,12 +989,12 @@ Storage.unpackTeam = function (buf) {
 		if (j !== i) {
 			var ivs = buf.substring(i, j).split(',');
 			set.ivs = {
-				hp: ivs[0] === '' ? 31 : Number(ivs[0]),
-				atk: ivs[1] === '' ? 31 : Number(ivs[1]),
-				def: ivs[2] === '' ? 31 : Number(ivs[2]),
-				spa: ivs[3] === '' ? 31 : Number(ivs[3]),
-				spd: ivs[4] === '' ? 31 : Number(ivs[4]),
-				spe: ivs[5] === '' ? 31 : Number(ivs[5])
+				hp: ivs[0] === '' ? 15 : Number(ivs[0]),
+				atk: ivs[1] === '' ? 15 : Number(ivs[1]),
+				def: ivs[2] === '' ? 15 : Number(ivs[2]),
+				spa: ivs[3] === '' ? 15 : Number(ivs[3]),
+				spd: ivs[4] === '' ? 15 : Number(ivs[4]),
+				spe: ivs[5] === '' ? 15 : Number(ivs[5])
 			};
 		}
 		i = j + 1;
@@ -1009,9 +1013,9 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 6);
+			if (i < buf.length) misc = buf.substring(i).split(',', 7);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 6);
+			if (i !== j) misc = buf.substring(i, j).split(',', 7);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -1020,6 +1024,7 @@ Storage.unpackTeam = function (buf) {
 			set.gigantamax = !!misc[3];
 			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 			set.teraType = misc[5];
+			set.costume = (misc[6] ? Number(misc[6]) : 0);
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1187,6 +1192,9 @@ Storage.importTeam = function (buffer, teams) {
 			curSet.ability = line;
 		} else if (line === 'Shiny: Yes') {
 			curSet.shiny = true;
+		} else if (line.substring(0, 9) === 'Costume: ') {
+			line = line.substr(9);
+			curSet.costume = +line;
 		} else if (line.substr(0, 7) === 'Level: ') {
 			line = line.substr(7);
 			curSet.level = +line;
@@ -1223,7 +1231,7 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 5) === 'IVs: ') {
 			line = line.substr(5);
 			var ivLines = line.split(' / ');
-			curSet.ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
+			curSet.ivs = {hp: 15, atk: 15, def: 15, spa: 15, spd: 15, spe: 15};
 			for (var j = 0; j < ivLines.length; j++) {
 				var ivLine = ivLines[j];
 				var spaceIndex = ivLine.indexOf(' ');
@@ -1231,12 +1239,18 @@ Storage.importTeam = function (buffer, teams) {
 				var statid = BattleStatIDs[ivLine.substr(spaceIndex + 1)];
 				var statval = parseInt(ivLine.substr(0, spaceIndex), 10);
 				if (!statid) continue;
-				if (isNaN(statval)) statval = 31;
+				if (isNaN(statval)) statval = 15;
 				curSet.ivs[statid] = statval;
 			}
 		} else if (line.match(/^[A-Za-z]+ (N|n)ature/)) {
 			var natureIndex = line.indexOf(' Nature');
 			if (natureIndex === -1) natureIndex = line.indexOf(' nature');
+			if (natureIndex === -1) continue;
+			line = line.substr(0, natureIndex);
+			if (line !== 'undefined') curSet.nature = line;
+		} else if (line.match(/^[A-Za-z]+ (E|e)mblem/)) {
+			var natureIndex = line.indexOf(' Emblem');
+			if (natureIndex === -1) natureIndex = line.indexOf(' emblem');
 			if (natureIndex === -1) continue;
 			line = line.substr(0, natureIndex);
 			if (line !== 'undefined') curSet.nature = line;
@@ -1317,6 +1331,9 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		if (curSet.shiny) {
 			text += 'Shiny: Yes  \n';
 		}
+		if (curSet.costume) {
+			text += 'Costume: ' + curSet.costume + "  \n";
+		}
 		if (typeof curSet.happiness === 'number' && curSet.happiness !== 255 && !isNaN(curSet.happiness)) {
 			text += 'Happiness: ' + curSet.happiness + "  \n";
 		}
@@ -1335,70 +1352,71 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		if (gen === 9) {
 			text += 'Tera Type: ' + (curSet.teraType || Dex.species.get(curSet.species).types[0]) + "  \n";
 		}
-		if (!hidestats) {
-			var first = true;
-			if (curSet.evs) {
-				for (var j in BattleStatNames) {
-					if (!curSet.evs[j]) continue;
-					if (first) {
-						text += 'EVs: ';
-						first = false;
-					} else {
-						text += ' / ';
-					}
-					text += '' + curSet.evs[j] + ' ' + BattleStatNames[j];
+		var first = true;
+		if (curSet.evs) {
+			for (var j in BattleStatNames) {
+				if (!curSet.evs[j]) continue;
+				if (first) {
+					text += 'EVs: ';
+					first = false;
+				} else {
+					text += ' / ';
 				}
+				text += '' + curSet.evs[j] + ' ' + BattleStatNames[j];
 			}
-			if (!first) {
-				text += "  \n";
-			}
-			if (curSet.nature) {
-				text += '' + curSet.nature + ' Nature' + "  \n";
-			}
-			var first = true;
-			if (curSet.ivs) {
-				var defaultIvs = true;
-				var hpType = false;
-				for (var j = 0; j < curSet.moves.length; j++) {
-					var move = curSet.moves[j];
-					if (move.substr(0, 13) === 'Hidden Power ' && move.substr(0, 14) !== 'Hidden Power [') {
-						hpType = move.substr(13);
-						if (!Dex.types.isName(hpType)) {
-							alert(move + " is not a valid Hidden Power type.");
-							continue;
-						}
-						for (var stat in BattleStatNames) {
-							if ((curSet.ivs[stat] === undefined ? 31 : curSet.ivs[stat]) !== (Dex.types.get(hpType).HPivs[stat] || 31)) {
-								defaultIvs = false;
-								break;
-							}
-						}
+		}
+		if (!first) {
+			text += "  \n";
+		}
+		/*if (curSet.nature) {
+			text += '' + curSet.nature + ' Nature' + "  \n";
+		}*/
+		if (curSet.nature) {
+			text += '' + curSet.nature + ' Emblem' + "  \n";
+		}
+		var first = true;
+		if (curSet.ivs) {
+			var defaultIvs = true;
+			var hpType = false;
+			for (var j = 0; j < curSet.moves.length; j++) {
+				var move = curSet.moves[j];
+				if (move.substr(0, 13) === 'Hidden Power ' && move.substr(0, 14) !== 'Hidden Power [') {
+					hpType = move.substr(13);
+					if (!Dex.types.isName(hpType)) {
+						alert(move + " is not a valid Hidden Power type.");
+						continue;
 					}
-				}
-				if (defaultIvs && !hpType) {
 					for (var stat in BattleStatNames) {
-						if (curSet.ivs[stat] !== 31 && curSet.ivs[stat] !== undefined) {
+						if ((curSet.ivs[stat] === undefined ? 15 : curSet.ivs[stat]) !== (Dex.types.get(hpType).HPivs[stat] || 15)) {
 							defaultIvs = false;
 							break;
 						}
 					}
 				}
-				if (!defaultIvs) {
-					for (var stat in BattleStatNames) {
-						if (typeof curSet.ivs[stat] === 'undefined' || isNaN(curSet.ivs[stat]) || curSet.ivs[stat] == 31) continue;
-						if (first) {
-							text += 'IVs: ';
-							first = false;
-						} else {
-							text += ' / ';
-						}
-						text += '' + curSet.ivs[stat] + ' ' + BattleStatNames[stat];
+			}
+			if (defaultIvs && !hpType) {
+				for (var stat in BattleStatNames) {
+					if (curSet.ivs[stat] !== 15 && curSet.ivs[stat] !== undefined) {
+						defaultIvs = false;
+						break;
 					}
 				}
 			}
-			if (!first) {
-				text += "  \n";
+			if (!defaultIvs) {
+				for (var stat in BattleStatNames) {
+					if (typeof curSet.ivs[stat] === 'undefined' || isNaN(curSet.ivs[stat]) || curSet.ivs[stat] == 15) continue;
+					if (first) {
+						text += 'IVs: ';
+						first = false;
+					} else {
+						text += ' / ';
+					}
+					text += '' + curSet.ivs[stat] + ' ' + BattleStatNames[stat];
+				}
 			}
+		}
+		if (!first) {
+			text += "  \n";
 		}
 		if (curSet.moves) for (var j = 0; j < curSet.moves.length; j++) {
 			var move = curSet.moves[j];

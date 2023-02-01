@@ -20,6 +20,22 @@
 type ID = string & {__isID: true};
 
 const BattleNatures: {[k in NatureName]: {plus?: StatName, minus?: StatName}} = {
+	Red: {
+		plus: "atk"
+	},
+	Blue: {
+		plus: "def"
+	},
+	Black: {
+		plus: "spa"
+	},
+	White: {
+		plus: "spd"
+	},
+	Green: {
+		plus: "spe"
+	},
+/*
 	Adamant: {
 		plus: 'atk',
 		minus: 'spa',
@@ -104,7 +120,7 @@ const BattleNatures: {[k in NatureName]: {plus?: StatName, minus?: StatName}} = 
 	Timid: {
 		plus: 'spe',
 		minus: 'atk',
-	},
+	},*/
 };
 const BattleStatIDs: {[k: string]: StatName | undefined} = {
 	HP: 'hp',
@@ -130,8 +146,8 @@ const BattleStatIDs: {[k: string]: StatName | undefined} = {
 /** Stat short names */
 const BattleStatNames = {
 	hp: 'HP',
-	atk: 'Atk',
-	def: 'Def',
+	atk: 'FoA',
+	def: 'FoD',
 	spa: 'SpA',
 	spd: 'SpD',
 	spe: 'Spe',
@@ -142,6 +158,11 @@ const BattleBaseSpeciesChart = [
 ] as ID[];
 
 const BattlePokemonIconIndexes: {[id: string]: number} = {
+	reimu: 1,
+	defensereimu: 1,
+	powerreimu: 1,
+	extrareimu: 1,
+
 	egg: 1020 + 1,
 	pikachubelle: 1020 + 2,
 	pikachulibre: 1020 + 3,
@@ -984,13 +1005,15 @@ const BattleAvatarNumbers: {[k: string]: string} = {
 };
 
 type StatName = 'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe';
-type NatureName = 'Adamant' | 'Bashful' | 'Bold' | 'Brave' | 'Calm' | 'Careful' | 'Docile' | 'Gentle' |
-	'Hardy' | 'Hasty' | 'Impish' | 'Jolly' | 'Lax' | 'Lonely' | 'Mild' | 'Modest' | 'Naive' | 'Naughty' |
-	'Quiet' | 'Quirky' | 'Rash' | 'Relaxed' | 'Sassy' | 'Serious' | 'Timid';
+type NatureName = 'Red' | 'Blue' | 'Black' | 'White' | 'Green';
+	//| 'Adamant' | 'Bashful' | 'Bold' | 'Brave' | 'Calm' | 'Careful' | 'Docile' | 'Gentle' |
+	//'Hardy' | 'Hasty' | 'Impish' | 'Jolly' | 'Lax' | 'Lonely' | 'Mild' | 'Modest' | 'Naive' | 'Naughty' |
+	//'Quiet' | 'Quirky' | 'Rash' | 'Relaxed' | 'Sassy' | 'Serious' | 'Timid';
 type StatNameExceptHP = 'atk' | 'def' | 'spa' | 'spd' | 'spe';
-type TypeName = 'Normal' | 'Fighting' | 'Flying' | 'Poison' | 'Ground' | 'Rock' | 'Bug' | 'Ghost' | 'Steel' |
+type TypeName = 'Void' | 'Nature' | 'Earth' | 'Wind' | 'Light' | 'Nether' | 'Illusion' | 'Sound' | 'Warped' | 'Dream' |
+	'Normal' | 'Fighting' | 'Flying' | 'Poison' | 'Ground' | 'Rock' | 'Bug' | 'Ghost' | 'Steel' |
 	'Fire' | 'Water' | 'Grass' | 'Electric' | 'Psychic' | 'Ice' | 'Dragon' | 'Dark' | 'Fairy' | '???';
-type StatusName = 'par' | 'psn' | 'frz' | 'slp' | 'brn';
+type StatusName = 'par' | 'shk' | 'psn' | 'tox' | 'frz' | 'slp' | 'stp' | 'brn' | 'brnheavy' | 'weak' | 'weakheavy' | 'dark' | 'fear';
 type BoostStatName = 'atk' | 'def' | 'spa' | 'spd' | 'spe' | 'evasion' | 'accuracy' | 'spc';
 type GenderName = 'M' | 'F' | 'N';
 
@@ -1212,7 +1235,8 @@ class Move implements Effect {
 		this.heal = data.heal || null;
 		this.multihit = data.multihit || null;
 		this.hasCrashDamage = data.hasCrashDamage || false;
-		this.noPPBoosts = data.noPPBoosts || false;
+		//this.noPPBoosts = data.noPPBoosts || false;
+		this.noPPBoosts = true;
 		this.secondaries = data.secondaries || (data.secondary ? [data.secondary] : null);
 		this.noSketch = !!data.noSketch;
 

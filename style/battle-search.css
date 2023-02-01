@@ -343,6 +343,9 @@
 .dexlist .movetypesortcol {
 	width: 35px;
 }
+.dexlist .classsortcol {
+	width: 30px;
+}
 .dexlist .powersortcol {
 	width: 30px;
 }

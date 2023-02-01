@@ -10,6 +10,7 @@ export class BattleBGM {
 	timer: number | undefined = undefined;
 	loopstart: number;
 	loopend: number;
+	samplerate: number;
 	/**
 	 * When multiple battles with BGM are open, they will be `isPlaying`, but only the
 	 * first one will be `isActuallyPlaying`. In addition, muting volume or setting
@@ -21,10 +22,11 @@ export class BattleBGM {
 	 * The sound should be rewound when it next plays.
 	 */
 	willRewind = true;
-	constructor(url: string, loopstart: number, loopend: number) {
+	constructor(url: string, loopstart: number, loopend: number, samplerate:number = 44100) {
 		this.url = url;
 		this.loopstart = loopstart;
 		this.loopend = loopend;
+		this.samplerate = samplerate;
 	}
 	play() {
 		this.willRewind = true;
@@ -76,14 +78,16 @@ export class BattleBGM {
 		if (this !== BattleSound.currentBgm()) return;
 		if (!this.sound) return;
 
-		const progress = this.sound.currentTime * 1000;
-		if (progress > this.loopend - 1000) {
-			this.sound.currentTime -= (this.loopend - this.loopstart) / 1000;
+		const progress = this.sound.currentTime;
+		if (progress >= this.loopend / this.samplerate || !this.isActuallyPlaying) {
+			//this.sound.currentTime = (this.loopend - this.loopstart) / 1000;
+			this.sound.currentTime = this.loopstart / this.samplerate;
+			this.resume();
 		}
 
 		this.timer = setTimeout(() => {
 			this.updateTime();
-		}, Math.max(this.loopend - progress, 1));
+		}, Math.max((this.loopend / this.samplerate) - progress, 1));
 	}
 
 	static update() {
@@ -115,7 +119,7 @@ export const BattleSound = new class {
 		if (this.soundCache[url]) return this.soundCache[url];
 		try {
 			const sound = document.createElement('audio');
-			sound.src = 'https://' + Config.routes.client + '/' + url;
+			sound.src = Dex.resourcePrefix + '/' + url;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;

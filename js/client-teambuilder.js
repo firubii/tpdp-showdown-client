@@ -1191,14 +1191,14 @@
 			buf += '<div class="setchart-nickname">';
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
-			buf += '<div class="setchart" style="' + Dex.getTeambuilderSprite(set, this.curTeam.gen) + ';">';
+			buf += '<div class="setchart">';
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
 			if (species.cosmeticFormes) {
 				buf += '<div class="setcell-sprite changeform"><i class="fa fa-caret-down"></i></div>';
 			} else {
-				buf += '<div class="setcell-sprite"></div>';
+				buf += '<div class="setcell-sprite" style="' + Dex.getTeambuilderSprite(set, this.curTeam.gen) + ';"></div>';
 			}
 			buf += '<div class="setcell setcell-pokemon"><label>Pok&eacute;mon</label><input type="text" name="pokemon" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.species) + '" autocomplete="off" /></div></div>';
 
@@ -1213,14 +1213,14 @@
 			};
 			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
 			if (this.curTeam.gen > 1) {
-				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || species.gender || 'N'] + '</span>';
-				if (isLetsGo) {
+				//buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || species.gender || 'N'] + '</span>';
+				/*if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 70) + '</span>';
 				} else if (this.curTeam.gen < 8 || isNatDex) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
-				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && this.curTeam.gen < 9) {
+				}*/
+				//buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				/*if (!isLetsGo && this.curTeam.gen < 9) {
 					if (this.curTeam.gen === 8 && !isNatDex) {
 						if (isBDSP && species.baseSpecies === "Unown") {
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
@@ -1229,7 +1229,9 @@
 					} else {
 						buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 					}
-				}
+				}*/
+				let costumeId = set.costume === undefined ? 0 : set.costume;
+				buf += '<span class="detailcell"><label>Costume</label>' + Dex.getPuppetCostumes(set, this.curTeam.format.endsWith('sodext'))[costumeId] + '</span>';
 				if (this.curTeam.gen === 8 && !isBDSP) {
 					if (!species.cannotDynamax && set.dynamaxLevel !== 10 && set.dynamaxLevel !== undefined) {
 						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
@@ -1238,9 +1240,9 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9) {
+				/*if (this.curTeam.gen === 9) {
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-				}
+				}*/
 			}
 			buf += '</button></div></div>';
 
@@ -1376,7 +1378,8 @@
 					nature: '',
 					evs: {},
 					ivs: {},
-					moves: []
+					moves: [],
+					costume: 0
 				};
 				team.push(newPokemon);
 			}
@@ -1845,7 +1848,7 @@
 			var set = this.curSet;
 			if (!set) return;
 
-			this.$('.setchart').attr('style', Dex.getTeambuilderSprite(set, this.curTeam.gen));
+			this.$('.setcell-sprite').attr('style', Dex.getTeambuilderSprite(set, this.curTeam.gen));
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
 
@@ -1916,7 +1919,7 @@
 
 			if (this.curTeam.gen <= 2) return;
 			if (supportsEVs) {
-				var maxEv = 510;
+				var maxEv = 130;
 				if (totalev <= maxEv) {
 					this.$chart.find('.totalev').html('<em>' + (totalev > (maxEv - 2) ? 0 : (maxEv - 2) - totalev) + '</em>');
 				} else {
@@ -2096,7 +2099,7 @@
 			var guessedMinus = guess.minusStat;
 			buf += '<p class="suggested"><small>Guessed spread:';
 			if (role === '?') {
-				buf += ' (Please choose 4 moves to get a guessed spread) (<a target="_blank" href="' + this.smogdexLink(species) + '">Smogon&nbsp;analysis</a>)</small></p>';
+				buf += ' (Please choose 4 moves to get a guessed spread)</p>';
 			} else {
 				buf += ' </small><button name="setStatFormGuesses">' + role + ': ';
 				for (var i in BattleStatNames) {
@@ -2105,9 +2108,10 @@
 						buf += '' + guessedEVs[i] + ' ' + statName + ' / ';
 					}
 				}
-				if (guessedPlus && guessedMinus) buf += ' (+' + BattleStatNames[guessedPlus] + ', -' + BattleStatNames[guessedMinus] + ')';
+				//if (guessedPlus && guessedMinus) buf += ' (+' + BattleStatNames[guessedPlus] + ', -' + BattleStatNames[guessedMinus] + ')';
+				if (guessedPlus) buf += ' (+' + BattleStatNames[guessedPlus] + ')';
 				else buf = buf.slice(0, -3);
-				buf += '</button><small> (<a target="_blank" href="' + this.smogdexLink(species) + '">Smogon&nbsp;analysis</a>)</small></p>';
+				buf += '</button></p>';
 				// buf += ' <small>(' + role + ' | bulk: phys ' + Math.round(guess.moveCount.physicalBulk/1000) + ' + spec ' + Math.round(guess.moveCount.specialBulk/1000) + ' = ' + Math.round(guess.moveCount.bulk/1000) + ')</small>';
 			}
 
@@ -2126,18 +2130,22 @@
 			var stats = {hp:'', atk:'', def:'', spa:'', spd:'', spe:''};
 			if (this.curTeam.gen === 1) delete stats.spd;
 			if (!set) return;
-			var nature = BattleNatures[set.nature || 'Serious'];
+			var nature = BattleNatures[set.nature || 'Green'];
 			if (!nature) nature = {};
 
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
 			// var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
-			var defaultEV = this.curTeam.gen <= 2 ? 252 : 0;
+			/*var defaultEV = this.curTeam.gen <= 2 ? 252 : 0;
 			var maxEV = supportsEVs ? 252 : 200;
-			var stepEV = supportsEVs ? 4 : 1;
+			var stepEV = supportsEVs ? 4 : 1;*/
+
+			var defaultEV = 0;
+			var maxEV = 64;
+			var stepEV = 1;
 
 			// label column
 			buf += '<div class="col labelcol"><div></div>';
-			buf += '<div><label>HP</label></div><div><label>Attack</label></div><div><label>Defense</label></div><div>';
+			buf += '<div><label>HP</label></div><div><label>Fo. Atk.</label></div><div><label>Fo. Def.</label></div><div>';
 			if (this.curTeam.gen === 1) {
 				buf += '<label>Special</label></div>';
 			} else {
@@ -2184,9 +2192,9 @@
 				totalev += (set.evs[i] || 0);
 			}
 			if (this.curTeam.gen > 2 && supportsEVs) {
-				var maxTotalEVs = 510;
+				var maxTotalEVs = 130;
 				if (totalev <= maxTotalEVs) {
-					buf += '<div class="totalev"><em>' + (totalev > (maxTotalEVs - 2) ? 0 : (maxTotalEVs - 2) - totalev) + '</em></div>';
+					buf += '<div class="totalev"><em>' + (maxTotalEVs - totalev) + '</em></div>';
 				} else {
 					buf += '<div class="totalev"><b>' + (maxTotalEVs - totalev) + '</b></div>';
 				}
@@ -2204,9 +2212,9 @@
 				buf += '<div class="col ivcol"><div><strong>IVs</strong></div>';
 				if (!set.ivs) set.ivs = {};
 				for (var i in stats) {
-					if (set.ivs[i] === undefined || isNaN(set.ivs[i])) set.ivs[i] = 31;
+					if (set.ivs[i] === undefined || isNaN(set.ivs[i])) set.ivs[i] = 15;
 					var val = '' + (set.ivs[i]);
-					buf += '<div><input type="number" name="iv-' + i + '" value="' + BattleLog.escapeHTML(val) + '" class="textbox inputform numform" min="0" max="31" step="1" /></div>';
+					buf += '<div><input type="number" name="iv-' + i + '" value="' + BattleLog.escapeHTML(val) + '" class="textbox inputform numform" min="0" max="15" step="1" /></div>';
 				}
 				var hpType = '';
 				if (set.moves) {
@@ -2258,7 +2266,7 @@
 
 					var minStat = this.curTeam.gen >= 6 ? 0 : 2;
 
-					buf += '<optgroup label="min Atk">';
+					buf += '<optgroup label="min Fo. Atk">';
 					for (var i = 0; i < hpIVs.length; i++) {
 						var spread = '';
 						for (var j = 0; j < 6; j++) {
@@ -2268,7 +2276,7 @@
 						buf += '<option value="' + spread + '">' + spread + '</option>';
 					}
 					buf += '</optgroup>';
-					buf += '<optgroup label="min Atk, min Spe">';
+					buf += '<optgroup label="min Fo. Atk, min Spe">';
 					for (var i = 0; i < hpIVs.length; i++) {
 						var spread = '';
 						for (var j = 0; j < 6; j++) {
@@ -2304,17 +2312,17 @@
 					buf += '<div style="margin-left:-80px;text-align:right"><select name="ivspread">';
 					buf += '<option value="" selected>IV spreads</option>';
 
-					buf += '<optgroup label="min Atk">';
-					buf += '<option value="31/0/31/31/31/31">31/0/31/31/31/31</option>';
+					buf += '<optgroup label="min Fo. Atk">';
+					buf += '<option value="15/0/15/15/15/15">15/0/15/15/15/15</option>';
 					buf += '</optgroup>';
-					buf += '<optgroup label="min Atk, min Spe">';
-					buf += '<option value="31/0/31/31/31/0">31/0/31/31/31/0</option>';
+					buf += '<optgroup label="min Fo. Atk, min Spe">';
+					buf += '<option value="15/0/15/15/15/0">15/0/15/15/15/0</option>';
 					buf += '</optgroup>';
 					buf += '<optgroup label="max all">';
-					buf += '<option value="31/31/31/31/31/31">31/31/31/31/31/31</option>';
+					buf += '<option value="15/15/15/15/15/15">15/15/15/15/15/15</option>';
 					buf += '</optgroup>';
 					buf += '<optgroup label="min Spe">';
-					buf += '<option value="31/31/31/31/31/0">31/31/31/31/31/0</option>';
+					buf += '<option value="15/15/15/15/15/0">15/15/15/15/15/0</option>';
 					buf += '</optgroup>';
 
 					buf += '</select></div>';
@@ -2324,7 +2332,7 @@
 				buf += '<div class="col ivcol"><div><strong>DVs</strong></div>';
 				if (!set.ivs) set.ivs = {};
 				for (var i in stats) {
-					if (set.ivs[i] === undefined || isNaN(set.ivs[i])) set.ivs[i] = 31;
+					if (set.ivs[i] === undefined || isNaN(set.ivs[i])) set.ivs[i] = 15;
 					var val = '' + Math.floor(set.ivs[i] / 2);
 					buf += '<div><input type="number" name="iv-' + i + '" value="' + BattleLog.escapeHTML(val) + '" class="textbox inputform numform" min="0" max="15" step="1" /></div>';
 				}
@@ -2338,18 +2346,18 @@
 			buf += '</div>';
 
 			if (this.curTeam.gen > 2) {
-				buf += '<p style="clear:both">Nature: <select name="nature">';
+				buf += '<p style="clear:both">Emblem: <select name="nature">';
 				for (var i in BattleNatures) {
 					var curNature = BattleNatures[i];
 					buf += '<option value="' + i + '"' + (curNature === nature ? 'selected="selected"' : '') + '>' + i;
 					if (curNature.plus) {
-						buf += ' (+' + BattleStatNames[curNature.plus] + ', -' + BattleStatNames[curNature.minus] + ')';
+						buf += ' (+' + BattleStatNames[curNature.plus] + ')';
 					}
 					buf += '</option>';
 				}
 				buf += '</select></p>';
 
-				buf += '<p><em>Protip:</em> You can also set natures by typing "+" and "-" next to a stat.</p>';
+				buf += '<p><em>Protip:</em> You can also set emblems by typing "+" next to a stat.</p>';
 			}
 
 			buf += '</div>';
@@ -2365,11 +2373,11 @@
 			var set = this.curSet;
 			if (!set) return;
 
-			if (this.plus === '' || this.minus === '') {
-				set.nature = 'Serious';
+			if (this.plus === '' /*|| this.minus === ''*/) {
+				set.nature = /*'Serious'*/ 'Green';
 			} else {
 				for (var i in BattleNatures) {
-					if (BattleNatures[i].plus === this.plus && BattleNatures[i].minus === this.minus) {
+					if (BattleNatures[i].plus === this.plus /*&& BattleNatures[i].minus === this.minus*/) {
 						set.nature = i;
 						break;
 					}
@@ -2437,7 +2445,7 @@
 					if (val === 30) val = 31;
 				}
 
-				if (val > 31 || isNaN(val)) val = 31;
+				if (val > 15 || isNaN(val)) val = 15;
 				if (val < 0) val = 0;
 
 				if (!set.ivs) set.ivs = {};
@@ -2478,9 +2486,9 @@
 			} else {
 				var hpTypeX = 0;
 				var i = 1;
-				var stats = {hp: 31, atk: 31, def: 31, spe: 31, spa: 31, spd: 31};
+				var stats = {hp: 15, atk: 15, def: 15, spe: 15, spa: 15, spd: 15};
 				for (var s in stats) {
-					if (set.ivs[s] === undefined) set.ivs[s] = 31;
+					if (set.ivs[s] === undefined) set.ivs[s] = 15;
 					hpTypeX += i * (set.ivs[s] % 2);
 					i *= 2;
 				}
@@ -2614,7 +2622,7 @@
 			buf += '<div class="formrow"><label class="formlabel">Level:</label><div><input type="number" min="1" max="100" step="1" name="level" value="' + (typeof set.level === 'number' ? set.level : 100) + '" class="textbox inputform numform" /></div></div>';
 
 			if (this.curTeam.gen > 1) {
-				buf += '<div class="formrow"><label class="formlabel">Gender:</label><div>';
+				/*buf += '<div class="formrow"><label class="formlabel">Gender:</label><div>';
 				if (species.gender && !this.curTeam.format.includes('hackmons')) {
 					var genderTable = {'M': "Male", 'F': "Female", 'N': "Genderless"};
 					buf += genderTable[species.gender];
@@ -2627,18 +2635,29 @@
 						buf += '<label><input type="radio" name="gender" value="N"' + (set.gender === 'N' ? ' checked' : '') + ' /> Genderless</label>';
 					}
 				}
-				buf += '</div></div>';
+				buf += '</div></div>';*/
 
-				if (isLetsGo) {
+				/*if (isLetsGo) {
 					buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" name="happiness" value="70" class="textbox inputform numform" /></div></div>';
 				} else {
 					if (this.curTeam.gen < 8 || isNatDex) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
-				}
+				}*/
 
-				buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
+				/*buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
 				buf += '<label><input type="radio" name="shiny" value="yes"' + (set.shiny ? ' checked' : '') + ' /> Yes</label> ';
 				buf += '<label><input type="radio" name="shiny" value="no"' + (!set.shiny ? ' checked' : '') + ' /> No</label>';
-				buf += '</div></div>';
+				buf += '</div></div>';*/
+
+				//No shinies, only costumes
+
+				//console.log('Loading costumes for ' + set.species);
+				let costumeId = set.costume === undefined ? 0 : set.costume;
+				let costumes = Dex.getPuppetCostumes(set, this.curTeam.format.endsWith('sodext'));
+				buf += '<div class="formrow"><label class="formlabel">Costume:</label><div><select name="costume">';
+				for (let i = 0; i < costumes.length; i++) {
+					buf += '<option value="' + costumes[i] + '"' + (costumeId === i ? ' selected="selected"' : '') + '>' + costumes[i] + '</option>';
+				}
+				buf += '</select></div></div>';
 
 				if (this.curTeam.gen === 8 && !isBDSP) {
 					if (!species.cannotDynamax) {
@@ -2679,7 +2698,7 @@
 				buf += '</select></div></div>';
 			}
 
-			if (this.curTeam.gen === 9) {
+			/*if (this.curTeam.gen === 9) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || species.types[0];
@@ -2687,7 +2706,7 @@
 					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
 				}
 				buf += '</select></div></div>';
-			}
+			}*/
 
 			buf += '</form>';
 			if (species.cosmeticFormes) {
@@ -2723,6 +2742,12 @@
 				set.shiny = true;
 			} else {
 				delete set.shiny;
+			}
+
+			// costume
+			var costume = this.$chart.find('select[name=costume]').val();
+			if (costume !== undefined) {
+				set.costume = Dex.puppetCostumeToID(set, costume);
 			}
 
 			// dynamax level
@@ -2780,14 +2805,16 @@
 			};
 			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
 			if (this.curTeam.gen > 1) {
-				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || 'N'] + '</span>';
-				if (isLetsGo) {
+				//buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || 'N'] + '</span>';
+				/*if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>70</span>';
 				} else {
 					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
-				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
+				}*/
+				//buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				//if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
+				let costumeId = set.costume === undefined ? 0 : set.costume;
+				buf += '<span class="detailcell"><label>Costume</label>' + Dex.getPuppetCostumes(set, this.curTeam.format.endsWith('sodext'))[costumeId] + '</span>';
 				if (this.curTeam.gen === 8 && !isBDSP) {
 					if (!species.cannotDynamax) {
 						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
@@ -2796,9 +2823,9 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9) {
+				/*if (this.curTeam.gen === 9) {
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-				}
+				}*/
 			}
 			this.$('button[name=details]').html(buf);
 
@@ -3162,7 +3189,7 @@
 				if (!this.canHyperTrain(set)) {
 					var hpType = moveName.substr(13);
 
-					set.ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
+					set.ivs = {hp: 15, atk: 15, def: 15, spa: 15, spd: 15, spe: 15};
 					if (this.curTeam.gen > 2) {
 						var HPivs = this.curTeam.dex.types.get(hpType).HPivs;
 						for (var i in HPivs) {
@@ -3179,7 +3206,7 @@
 						var spcDV = Math.floor(set.ivs.spa / 2);
 						var expectedHpDV = (atkDV % 2) * 8 + (defDV % 2) * 4 + (speDV % 2) * 2 + (spcDV % 2);
 						set.ivs.hp = expectedHpDV * 2;
-						if (set.ivs.hp === 30) set.ivs.hp = 31;
+						if (set.ivs.hp === 30) set.ivs.hp = 15;
 					}
 				}
 			} else if (moveName === 'Return') {
@@ -3228,22 +3255,22 @@
 				if (minSpe === undefined && (!minAtk || gen < 3)) return;
 				set.ivs = {};
 			}
-			if (!set.ivs['spe'] && set.ivs['spe'] !== 0) set.ivs['spe'] = 31;
+			if (!set.ivs['spe'] && set.ivs['spe'] !== 0) set.ivs['spe'] = 15;
 			if (minSpe) {
 				// min Spe
 				set.ivs['spe'] = (hasHiddenPower ? set.ivs['spe'] % hpModulo : 0);
 			} else if (minSpe === false) {
 				// max Spe
-				set.ivs['spe'] = (hasHiddenPower ? 30 + (set.ivs['spe'] % 2) : 31);
+				set.ivs['spe'] = (hasHiddenPower ? 30 + (set.ivs['spe'] % 2) : 15);
 			}
 			if (gen < 3) return;
-			if (!set.ivs['atk'] && set.ivs['atk'] !== 0) set.ivs['atk'] = 31;
+			if (!set.ivs['atk'] && set.ivs['atk'] !== 0) set.ivs['atk'] = 15;
 			if (minAtk) {
 				// min Atk
 				set.ivs['atk'] = (hasHiddenPower ? set.ivs['atk'] % hpModulo : 0);
 			} else {
 				// max Atk
-				set.ivs['atk'] = (hasHiddenPower ? 30 + (set.ivs['atk'] % 2) : 31);
+				set.ivs['atk'] = (hasHiddenPower ? 30 + (set.ivs['atk'] % 2) : 15);
 			}
 		},
 		setPokemon: function (val, selectNext) {
@@ -3286,6 +3313,7 @@
 				set.item = '';
 			}
 			set.ability = species.abilities['0'];
+			set.costume = 0;
 
 			set.moves = [];
 			set.evs = {};
@@ -3308,12 +3336,12 @@
 			if (!set) return 0;
 
 			if (!set.ivs) set.ivs = {
-				hp: 31,
-				atk: 31,
-				def: 31,
-				spa: 31,
-				spd: 31,
-				spe: 31
+				hp: 15,
+				atk: 15,
+				def: 15,
+				spa: 15,
+				spd: 15,
+				spe: 15
 			};
 			if (!set.evs) set.evs = {};
 
@@ -3323,24 +3351,25 @@
 			if (!species.exists) return 0;
 
 			if (!set.level) set.level = 100;
-			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
+			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 15;
 
 			var baseStat = species.baseStats[stat];
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
 			var ev = set.evs[stat];
 			if (evOverride !== undefined) ev = evOverride;
-			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 252);
-
+			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 64);
+			
 			if (stat === 'hp') {
 				if (baseStat === 1) return 1;
 				if (!supportsEVs) return Math.floor(Math.floor(2 * baseStat + iv + 100) * set.level / 100 + 10) + (supportsAVs ? ev : 0);
-				return Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
+				//return Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
+				return Math.floor(((2 * (baseStat + iv) + ev) / 100 + 1) * set.level + 10);
 			}
-			var val = Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4)) * set.level / 100 + 5);
-			if (!supportsEVs) {
+			var val = Math.floor(((2 * (baseStat + iv) + ev) / 100) * set.level + 5);
+			/*if (!supportsEVs) {
 				val = Math.floor(Math.floor(2 * baseStat + iv) * set.level / 100 + 5);
-			}
+			}*/
 			if (natureOverride) {
 				val *= natureOverride;
 			} else if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {

@@ -34,6 +34,7 @@ class PSSearchResults extends preact.Component<{search: DexSearch}> {
 			<button class={`sortcol movenamesortcol${sortCol === 'name' ? ' cur' : ''}`} data-sort="name">Name</button>
 			<button class={`sortcol movetypesortcol${sortCol === 'type' ? ' cur' : ''}`} data-sort="type">Type</button>
 			<button class={`sortcol movetypesortcol${sortCol === 'category' ? ' cur' : ''}`} data-sort="category">Cat</button>
+			<button class={`sortcol classsortcol${sortCol === 'class' ? ' cur' : ''}`} data-sort="class">Class</button>
 			<button class={`sortcol powersortcol${sortCol === 'power' ? ' cur' : ''}`} data-sort="power">Pow</button>
 			<button class={`sortcol accuracysortcol${sortCol === 'accuracy' ? ' cur' : ''}`} data-sort="accuracy">Acc</button>
 			<button class={`sortcol ppsortcol${sortCol === 'pp' ? ' cur' : ''}`} data-sort="pp">PP</button>
@@ -95,8 +96,8 @@ class PSSearchResults extends preact.Component<{search: DexSearch}> {
 			)}
 
 			<span class="col statcol"><em>HP</em><br />{stats.hp}</span>
-			<span class="col statcol"><em>Atk</em><br />{stats.atk}</span>
-			<span class="col statcol"><em>Def</em><br />{stats.def}</span>
+			<span class="col statcol"><em>FoA</em><br />{stats.atk}</span>
+			<span class="col statcol"><em>FoD</em><br />{stats.def}</span>
 			{search.dex.gen > 2 && <span class="col statcol"><em>SpA</em><br />{stats.spa}</span>}
 			{search.dex.gen > 2 && <span class="col statcol"><em>SpD</em><br />{stats.spd}</span>}
 			{search.dex.gen < 2 && <span class="col statcol"><em>Spc</em><br />{stats.spa}</span>}
@@ -186,7 +187,7 @@ class PSSearchResults extends preact.Component<{search: DexSearch}> {
 			</a></li>;
 		}
 
-		let pp = (move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
+		let pp = move.pp; //(move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
 		if (search.dex.gen < 3) pp = Math.min(61, pp);
 		return <li class="result"><a href={`${this.URL_ROOT}move/${id}`} data-target="push" data-entry={`move|${move.name}`}>
 			<span class="col movenamecol">{this.renderName(move.name, matchStart, matchEnd, tagStart)}</span>

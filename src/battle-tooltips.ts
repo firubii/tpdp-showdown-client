@@ -475,7 +475,7 @@ class BattleTooltips {
 		return boostText;
 	}
 
-	static zMoveTable: {[type in TypeName]: string} = {
+	static zMoveTable: {[t:string]: string} = {
 		Poison: "Acid Downpour",
 		Fighting: "All-Out Pummeling",
 		Dark: "Black Hole Eclipse",
@@ -497,7 +497,7 @@ class BattleTooltips {
 		"???": "",
 	};
 
-	static maxMoveTable: {[type in TypeName]: string} = {
+	static maxMoveTable: {[t:string]: string} = {
 		Poison: "Max Ooze",
 		Fighting: "Max Knuckle",
 		Dark: "Max Darkness",
@@ -772,10 +772,10 @@ class BattleTooltips {
 	) {
 		const pokemon = clientPokemon || serverPokemon!;
 		let text = '';
-		let genderBuf = '';
-		const gender = pokemon.gender;
-		if (gender === 'M' || gender === 'F') {
-			genderBuf = ` <img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" /> `;
+		let styleBuf = '';
+		const puppetStyle = pokemon.speciesForme.split(' ')[0].toLowerCase();
+		if (['assist', 'defense', 'extra', 'normal', 'power', 'speed'].includes(puppetStyle)) {
+			styleBuf += ` <img src="${Dex.resourcePrefix}sprites/styles/${puppetStyle}.png" alt="${pokemon.speciesForme.split(' ')[0]}" width="16" height="16" class="pixelated" />`;
 		}
 
 		let name = BattleLog.escapeHTML(pokemon.name);
@@ -785,7 +785,7 @@ class BattleTooltips {
 
 		let levelBuf = (pokemon.level !== 100 ? ` <small>L${pokemon.level}</small>` : ``);
 		if (!illusionIndex || illusionIndex === 1) {
-			text += `<h2>${name}${genderBuf}${illusionIndex ? '' : levelBuf}<br />`;
+			text += `<h2>${name}${styleBuf}${illusionIndex ? '' : levelBuf}<br />`;
 
 			if (clientPokemon?.volatiles.formechange) {
 				if (clientPokemon.volatiles.transform) {
@@ -819,7 +819,48 @@ class BattleTooltips {
 			text += '<p><small>HP:</small> (fainted)</p>';
 		} else if (this.battle.hardcoreMode) {
 			if (serverPokemon) {
-				text += '<p><small>HP:</small> ' + serverPokemon.hp + '/' + serverPokemon.maxhp + (pokemon.status ? ' <span class="status ' + pokemon.status + '">' + pokemon.status.toUpperCase() + '</span>' : '') + '</p>';
+				text += '<p><small>HP:</small> ' + serverPokemon.hp + '/' + serverPokemon.maxhp;
+				for (let i = 0; i < pokemon.status.length; i++) {
+					let id: string = pokemon.status[i];
+					let statusName:string = id;
+					switch (id) {
+						case 'brn':
+							statusName = "BURN";
+							break;
+						case 'psn':
+							statusName = "POIS";
+							break;
+						case 'fear':
+							statusName = "FEAR";
+							break;
+						case 'dark':
+							statusName = "DARK";
+							break;
+						case 'par':
+							statusName = "PARA";
+							break;
+						case 'weak':
+							statusName = "WEAK";
+							break;
+						case 'brnheavy':
+							statusName = "HEAVY BURN";
+							break;
+						case 'tox':
+							statusName = "HEAVY POIS";
+							break;
+						case 'stp':
+							statusName = "STOPPED";
+							break;
+						case 'shk':
+							statusName = "SHOCKED";
+							break;
+						case 'weakheavy':
+							statusName = "HEAVY WEAK";
+							break;
+					}
+					text += '  <img src="' + Dex.resourcePrefix + 'sprites/statuses/' + encodeURIComponent(id) + '.png" alt="' + statusName + '" class="pixelated" /> ';
+				}
+				text += '</p>';
 			}
 		} else {
 			let exacthp = '';
@@ -828,15 +869,55 @@ class BattleTooltips {
 			} else if (pokemon.maxhp === 48) {
 				exacthp = ' <small>(' + pokemon.hp + '/' + pokemon.maxhp + ' pixels)</small>';
 			}
-			text += '<p><small>HP:</small> ' + Pokemon.getHPText(pokemon) + exacthp + (pokemon.status ? ' <span class="status ' + pokemon.status + '">' + pokemon.status.toUpperCase() + '</span>' : '');
+			text += '<p><small>HP:</small> ' + Pokemon.getHPText(pokemon) + exacthp;
+			for (let i = 0; i < pokemon.status.length; i++) {
+				let id: string = pokemon.status[i];
+				let statusName:string = id;
+				switch (id) {
+					case 'brn':
+						statusName = "BURN";
+						break;
+					case 'psn':
+						statusName = "POIS";
+						break;
+					case 'fear':
+						statusName = "FEAR";
+						break;
+					case 'dark':
+						statusName = "DARK";
+						break;
+					case 'par':
+						statusName = "PARA";
+						break;
+					case 'weak':
+						statusName = "WEAK";
+						break;
+					case 'brnheavy':
+						statusName = "HEAVY BURN";
+						break;
+					case 'tox':
+						statusName = "HEAVY POIS";
+						break;
+					case 'stp':
+						statusName = "STOPPED";
+						break;
+					case 'shk':
+						statusName = "SHOCKED";
+						break;
+					case 'weakheavy':
+						statusName = "HEAVY WEAK";
+						break;
+				}
+				text += '  <img src="' + Dex.resourcePrefix + 'sprites/statuses/' + encodeURIComponent(id) + '.png" alt="' + statusName + '" class="pixelated" /> ';
+			}
 			if (clientPokemon) {
-				if (pokemon.status === 'tox') {
+				if (pokemon.status.includes('tox')) {
 					if (pokemon.ability === 'Poison Heal' || pokemon.ability === 'Magic Guard') {
 						text += ' <small>Would take if ability removed: ' + Math.floor(100 / 16 * Math.min(clientPokemon.statusData.toxicTurns + 1, 15)) + '%</small>';
 					} else {
 						text += ' Next damage: ' + Math.floor(100 / (clientPokemon.volatiles['dynamax'] ? 32 : 16) * Math.min(clientPokemon.statusData.toxicTurns + 1, 15)) + '%';
 					}
-				} else if (pokemon.status === 'slp') {
+				} else if (pokemon.status.includes('slp')) {
 					text += ' Turns asleep: ' + clientPokemon.statusData.sleepTurns;
 				}
 			}
@@ -1005,7 +1086,7 @@ class BattleTooltips {
 		if (pokemon.status) {
 			if (this.battle.gen > 2 && ability === 'guts') {
 				stats.atk = Math.floor(stats.atk * 1.5);
-			} else if (this.battle.gen < 2 && pokemon.status === 'brn') {
+			} else if (this.battle.gen < 2 && pokemon.status.includes('brn')) {
 				stats.atk = Math.floor(stats.atk * 0.5);
 			}
 
@@ -1251,7 +1332,7 @@ class BattleTooltips {
 		stats.spe = stats.spe * chainedSpeedModifier;
 		stats.spe = stats.spe % 1 > 0.5 ? Math.ceil(stats.spe) : Math.floor(stats.spe);
 
-		if (pokemon.status === 'par' && ability !== 'quickfeet') {
+		if (pokemon.status.includes('par') && ability !== 'quickfeet') {
 			if (this.battle.gen > 6) {
 				stats.spe = Math.floor(stats.spe * 0.5);
 			} else {
@@ -1319,7 +1400,7 @@ class BattleTooltips {
 			maxpp = 5;
 		} else {
 			move = this.battle.dex.moves.get(moveName);
-			maxpp = (move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
+			maxpp = move.pp; //(move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
 			if (this.battle.gen < 3) maxpp = Math.min(61, maxpp);
 		}
 		const bullet = moveName.charAt(0) === '*' || move.isZ ? '<span style="color:#888">&#8226;</span>' : '&#8226;';
@@ -1363,7 +1444,7 @@ class BattleTooltips {
 
 		let minNature = (isRandomBattle || gen < 3) ? 1 : 0.9;
 		let maxNature = (isRandomBattle || gen < 3) ? 1 : 1.1;
-		let maxIv = (gen < 3) ? 30 : 31;
+		let maxIv = 15; //(gen < 3) ? 30 : 31;
 
 		let min;
 		let max;
@@ -1373,9 +1454,9 @@ class BattleTooltips {
 			if (tier.includes('No Restrictions')) max += 200;
 			else if (tier.includes('Random')) max += 20;
 		} else {
-			let maxIvEvOffset = maxIv + ((isRandomBattle && gen >= 3) ? 21 : 63);
-			max = tr(tr((2 * baseSpe + maxIvEvOffset) * level / 100 + 5) * maxNature);
-			min = isCGT ? max : tr(tr(2 * baseSpe * level / 100 + 5) * minNature);
+			//let maxIvEvOffset = maxIv + ((isRandomBattle && gen >= 3) ? 21 : 63);
+			min = tr((2 * baseSpe / 100 * level + 5) * minNature);
+			max = tr(((2 * (baseSpe + 15) + 64) / 100 * level + 5) * maxNature);
 		}
 		return [min, max];
 	}
@@ -1649,7 +1730,7 @@ class BattleTooltips {
 		if (move.id === 'eruption' || move.id === 'waterspout' || move.id === 'dragonenergy') {
 			value.set(Math.floor(150 * pokemon.hp / pokemon.maxhp) || 1);
 		}
-		if (move.id === 'facade' && !['', 'slp', 'frz'].includes(pokemon.status)) {
+		if (move.id === 'facade' && (!pokemon.status.includes('slp') && !pokemon.status.includes('frz'))) {
 			value.modify(2, 'Facade + status');
 		}
 		if (move.id === 'flail' || move.id === 'reversal') {
@@ -1686,7 +1767,7 @@ class BattleTooltips {
 			value.set(Math.min(60 + 20 * boostCount, 200));
 		}
 		if (move.id === 'smellingsalts' && target) {
-			if (target.status === 'par') {
+			if (target.status.includes('par')) {
 				value.modify(2, 'Smelling Salts + Paralysis');
 			}
 		}
@@ -1710,12 +1791,12 @@ class BattleTooltips {
 			value.setRange(10, 150);
 		}
 		if (['venoshock', 'barbbarrage'].includes(move.id) && target) {
-			if (['psn', 'tox'].includes(target.status)) {
+			if ((target.status.includes('psn') || target.status.includes('tox'))) {
 				value.modify(2, move.name + ' + Poison');
 			}
 		}
 		if (move.id === 'wakeupslap' && target) {
-			if (target.status === 'slp') {
+			if (target.status.includes('slp')) {
 				value.modify(2, 'Wake-Up Slap + Sleep');
 			}
 		}
@@ -1819,7 +1900,7 @@ class BattleTooltips {
 		if (!value.value) return value;
 
 		// Other ability boosts
-		if (pokemon.status === 'brn' && move.category === 'Special') {
+		if (pokemon.status.includes('brn') && move.category === 'Special') {
 			value.abilityModify(1.5, "Flare Boost");
 		}
 		if (move.flags['punch']) {
@@ -1834,10 +1915,10 @@ class BattleTooltips {
 		if (value.value <= 60) {
 			value.abilityModify(1.5, "Technician");
 		}
-		if (['psn', 'tox'].includes(pokemon.status) && move.category === 'Physical') {
+		if ((pokemon.status.includes('psn') || pokemon.status.includes('tox')) && move.category === 'Physical') {
 			value.abilityModify(1.5, "Toxic Boost");
 		}
-		if (this.battle.gen > 2 && serverPokemon.status === 'brn' && move.id !== 'facade' && move.category === 'Physical') {
+		if (this.battle.gen > 2 && serverPokemon.status.includes('brn') && move.id !== 'facade' && move.category === 'Physical') {
 			if (!value.tryAbility("Guts")) value.modify(0.5, 'Burn');
 		}
 		if (['Rock', 'Ground', 'Steel'].includes(moveType) && this.battle.weather === 'sandstorm') {
@@ -2203,6 +2284,7 @@ interface PokemonSet {
 	gigantamax?: boolean;
 	/** Defaults to the primary type */
 	teraType?: string;
+	costume?: number;
 }
 
 class BattleStatGuesser {
@@ -2520,8 +2602,8 @@ class BattleStatGuesser {
 		if (!evs[stat]) evs[stat] = 0;
 		let diff = min - evs[stat];
 		if (diff <= 0) return evTotal;
-		if (evTotal <= 504) {
-			let change = Math.min(508 - evTotal, diff);
+		if (evTotal <= 130) {
+			let change = Math.min(130 - evTotal, diff);
 			evTotal += change;
 			evs[stat] += change;
 			diff -= change;
@@ -2531,7 +2613,7 @@ class BattleStatGuesser {
 		let prioStat: StatName;
 		for (prioStat in evPriority) {
 			if (prioStat === stat) continue;
-			if (evs[prioStat] && evs[prioStat] > 128) {
+			if (evs[prioStat] && evs[prioStat] > 64) {
 				evs[prioStat] -= diff;
 				evs[stat] += diff;
 				return evTotal;
@@ -2605,7 +2687,7 @@ class BattleStatGuesser {
 			// no change
 		} else if (this.ignoreEVLimits) {
 			// Gen 1-2, hackable EVs (like Hackmons)
-			evs = {hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252};
+			evs = {hp: 64, atk: 64, def: 64, spa: 64, spd: 64, spe: 64};
 			if (!moveCount['PhysicalAttack']) evs.atk = 0;
 			if (!moveCount['SpecialAttack'] && this.dex.gen > 1) evs.spa = 0;
 			if (hasMove['gyroball'] || hasMove['trickroom']) evs.spe = 0;
@@ -2618,17 +2700,17 @@ class BattleStatGuesser {
 			let evTotal = 0;
 
 			let primaryStat = statChart[role][0];
-			let stat = this.getStat(primaryStat, set, 252, plusStat === primaryStat ? 1.1 : 1.0);
-			let ev = 252;
-			while (ev > 0 && stat <= this.getStat(primaryStat, set, ev - 4, plusStat === primaryStat ? 1.1 : 1.0)) ev -= 4;
+			let stat = this.getStat(primaryStat, set, 64, plusStat === primaryStat ? 1.1 : 1.0);
+			let ev = 64;
+			while (ev > 0 && stat <= this.getStat(primaryStat, set, ev - 2, plusStat === primaryStat ? 1.1 : 1.0)) ev -= 2;
 			evs[primaryStat] = ev;
 			evTotal += ev;
 
 			let secondaryStat: StatName | null = statChart[role][1];
 			if (secondaryStat === 'hp' && set.level && set.level < 20) secondaryStat = 'spd';
-			stat = this.getStat(secondaryStat, set, 252, plusStat === secondaryStat ? 1.1 : 1.0);
-			ev = 252;
-			while (ev > 0 && stat <= this.getStat(secondaryStat, set, ev - 4, plusStat === secondaryStat ? 1.1 : 1.0)) ev -= 4;
+			stat = this.getStat(secondaryStat, set, 64, plusStat === secondaryStat ? 1.1 : 1.0);
+			ev = 64;
+			while (ev > 0 && stat <= this.getStat(secondaryStat, set, ev - 2, plusStat === secondaryStat ? 1.1 : 1.0)) ev -= 2;
 			evs[secondaryStat] = ev;
 			evTotal += ev;
 
@@ -2670,19 +2752,19 @@ class BattleStatGuesser {
 			}
 
 			if (hpDivisibility) {
-				while (hp < 252 && evTotal < 508 && !(stat % hpDivisibility) !== hpShouldBeDivisible) {
-					hp += 4;
+				while (hp < 64 && evTotal < 130 && !(stat % hpDivisibility) !== hpShouldBeDivisible) {
+					hp += 2;
 					stat = this.getStat('hp', set, hp, 1);
-					evTotal += 4;
+					evTotal += 2;
 				}
 				while (hp > 0 && !(stat % hpDivisibility) !== hpShouldBeDivisible) {
-					hp -= 4;
+					hp -= 2;
 					stat = this.getStat('hp', set, hp, 1);
-					evTotal -= 4;
+					evTotal -= 2;
 				}
-				while (hp > 0 && stat === this.getStat('hp', set, hp - 4, 1)) {
-					hp -= 4;
-					evTotal -= 4;
+				while (hp > 0 && stat === this.getStat('hp', set, hp - 2, 1)) {
+					hp -= 2;
+					evTotal -= 2;
 				}
 				if (hp || evs['hp']) evs['hp'] = hp;
 			}
@@ -2703,9 +2785,9 @@ class BattleStatGuesser {
 				evTotal = this.ensureMaxEVs(evs, 'spe', 220, evTotal);
 			}
 
-			if (evTotal < 508) {
-				let remaining = 508 - evTotal;
-				if (remaining > 252) remaining = 252;
+			if (evTotal < 130 /*508*/) {
+				let remaining = 130 - evTotal;
+				if (remaining > 64) remaining = 64;
 				secondaryStat = null;
 				if (!evs['atk'] && moveCount['PhysicalAttack'] >= 1) {
 					secondaryStat = 'atk';
@@ -2723,14 +2805,14 @@ class BattleStatGuesser {
 				if (secondaryStat) {
 					ev = remaining;
 					stat = this.getStat(secondaryStat, set, ev);
-					while (ev > 0 && stat === this.getStat(secondaryStat, set, ev - 4)) ev -= 4;
+					while (ev > 0 && stat === this.getStat(secondaryStat, set, ev - 2)) ev -= 2;
 					if (ev) evs[secondaryStat] = ev;
 					remaining -= ev;
 				}
 				if (remaining && !evs['spe']) {
 					ev = remaining;
 					stat = this.getStat('spe', set, ev);
-					while (ev > 0 && stat === this.getStat('spe', set, ev - 4)) ev -= 4;
+					while (ev > 0 && stat === this.getStat('spe', set, ev - 2)) ev -= 2;
 					if (ev) evs['spe'] = ev;
 				}
 			}
@@ -2762,7 +2844,7 @@ class BattleStatGuesser {
 		}
 
 		evs.plusStat = plusStat;
-		evs.minusStat = minusStat;
+		evs.minusStat = "";
 
 		return evs;
 	}
@@ -2776,22 +2858,22 @@ class BattleStatGuesser {
 		let baseStat = species.baseStats[stat];
 
 		let iv = (set.ivs && set.ivs[stat]);
-		if (typeof iv !== 'number') iv = 31;
-		if (this.dex.gen <= 2) iv &= 30;
+		if (typeof iv !== 'number') iv = 15;
+		//if (this.dex.gen <= 2) iv &= 15;
 
 		let ev = (set.evs && set.evs[stat]);
-		if (typeof ev !== 'number') ev = (this.dex.gen > 2 ? 0 : 252);
+		if (typeof ev !== 'number') ev = (this.dex.gen > 2 ? 0 : 64);
 		if (evOverride !== undefined) ev = evOverride;
 
 		if (stat === 'hp') {
 			if (baseStat === 1) return 1;
-			if (!this.supportsEVs) return ~~(~~(2 * baseStat + iv + 100) * level / 100 + 10) + (this.supportsAVs ? ev : 0);
-			return ~~(~~(2 * baseStat + iv + ~~(ev / 4) + 100) * level / 100 + 10);
+			//if (!this.supportsEVs) return ~~(~~(2 * baseStat + iv + 100) * level / 100 + 10) + (this.supportsAVs ? ev : 0);
+			return ~~(((2 * (baseStat + iv) + ev) / 100 + 1) * level + 10);
 		}
-		let val = ~~(~~(2 * baseStat + iv + ~~(ev / 4)) * level / 100 + 5);
-		if (!this.supportsEVs) {
+		let val = ~~((2 * (baseStat + iv) + ev) / 100 * level + 5);
+		/*if (!this.supportsEVs) {
 			val = ~~(~~(2 * baseStat + iv) * level / 100 + 5);
-		}
+		}*/
 		if (natureOverride) {
 			val *= natureOverride;
 		} else if (BattleNatures[set.nature!]?.plus === stat) {
@@ -2799,10 +2881,10 @@ class BattleStatGuesser {
 		} else if (BattleNatures[set.nature!]?.minus === stat) {
 			val *= 0.9;
 		}
-		if (!this.supportsEVs) {
+		/*if (!this.supportsEVs) {
 			let friendshipValue = ~~((70 / 255 / 10 + 1) * 100);
 			val = ~~(val) * friendshipValue / 100 + (this.supportsAVs ? ev : 0);
-		}
+		}*/
 		return ~~(val);
 	}
 }

@@ -165,8 +165,8 @@ class TeamTextbox extends preact.Component<{team: Team}> {
 					const num = Dex.getPokemonIconNum(toID(species));
 					if (!num) return null;
 
-					const top = Math.floor(num / 12) * 30;
-					const left = (num % 12) * 40;
+					const top = Math.floor(num / 16) * 40;
+					const left = (num % 16) * 40;
 					const iconStyle = `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png) no-repeat scroll -${left}px -${top}px`;
 
 					return <span class="picon" style={

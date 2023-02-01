@@ -285,7 +285,7 @@
 	color: #777777;
 }
 .utilichart .movedesccol {
-	width: 284px;
+	width: 275px;
 }
 .utilichart .itemdesccol {
 	width: 464px;
@@ -342,6 +342,9 @@
 }
 .utilichart .movetypesortcol {
 	width: 35px;
+}
+.utilichart .classsortcol {
+	width: 30px;
 }
 .utilichart .powersortcol {
 	width: 30px;

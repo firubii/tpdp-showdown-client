@@ -65,12 +65,12 @@ class PSTeambuilder {
 
 			// ivs
 			if (set.ivs) {
-				buf += '|' + (set.ivs['hp'] === 31 ? '' : set.ivs['hp']) + ',' +
-					(set.ivs['atk'] === 31 ? '' : set.ivs['atk']) + ',' +
-					(set.ivs['def'] === 31 ? '' : set.ivs['def']) + ',' +
-					(set.ivs['spa'] === 31 ? '' : set.ivs['spa']) + ',' +
-					(set.ivs['spd'] === 31 ? '' : set.ivs['spd']) + ',' +
-					(set.ivs['spe'] === 31 ? '' : set.ivs['spe']);
+				buf += '|' + (set.ivs['hp'] === 15 ? '' : set.ivs['hp']) + ',' +
+					(set.ivs['atk'] === 15 ? '' : set.ivs['atk']) + ',' +
+					(set.ivs['def'] === 15 ? '' : set.ivs['def']) + ',' +
+					(set.ivs['spa'] === 15 ? '' : set.ivs['spa']) + ',' +
+					(set.ivs['spd'] === 15 ? '' : set.ivs['spd']) + ',' +
+					(set.ivs['spe'] === 15 ? '' : set.ivs['spe']);
 			} else {
 				buf += '|';
 			}
@@ -98,12 +98,13 @@ class PSTeambuilder {
 
 			if (
 				set.pokeball || (set.hpType && toID(set.hpType) !== hasHP) || set.gigantamax ||
-				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10)
+				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.costume
 			) {
 				buf += ',' + (set.hpType || '');
 				buf += ',' + toID(set.pokeball);
 				buf += ',' + (set.gigantamax ? 'G' : '');
 				buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
+				buf += ',' + (set.costume || '');
 			}
 		}
 
@@ -173,12 +174,12 @@ class PSTeambuilder {
 			if (parts[8]) {
 				const ivs = parts[8].split(',');
 				set.ivs = {
-					hp: ivs[0] === '' ? 31 : Number(ivs[0]),
-					atk: ivs[1] === '' ? 31 : Number(ivs[1]),
-					def: ivs[2] === '' ? 31 : Number(ivs[2]),
-					spa: ivs[3] === '' ? 31 : Number(ivs[3]),
-					spd: ivs[4] === '' ? 31 : Number(ivs[4]),
-					spe: ivs[5] === '' ? 31 : Number(ivs[5]),
+					hp: ivs[0] === '' ? 15 : Number(ivs[0]),
+					atk: ivs[1] === '' ? 15 : Number(ivs[1]),
+					def: ivs[2] === '' ? 15 : Number(ivs[2]),
+					spa: ivs[3] === '' ? 15 : Number(ivs[3]),
+					spd: ivs[4] === '' ? 15 : Number(ivs[4]),
+					spe: ivs[5] === '' ? 15 : Number(ivs[5]),
 				};
 			}
 
@@ -190,12 +191,13 @@ class PSTeambuilder {
 
 			// happiness
 			if (parts[11]) {
-				let misc = parts[11].split(',', 4);
+				let misc = parts[11].split(',', 5);
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
 				set.hpType = misc[1];
 				set.pokeball = misc[2];
 				set.gigantamax = !!misc[3];
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
+				set.costume = (misc[5] ? Number(misc[5]) : 0);
 			}
 		}
 
@@ -254,7 +256,7 @@ class PSTeambuilder {
 			text += `  \n`;
 		}
 		if (set.nature) {
-			text += `${set.nature} Nature  \n`;
+			text += `${set.nature} Emblem  \n`;
 		}
 		first = true;
 		if (set.ivs) {
@@ -279,6 +281,9 @@ class PSTeambuilder {
 		}
 		if (set.shiny) {
 			text += `Shiny: Yes  \n`;
+		}
+		if (set.costume) {
+			text += `Costume: ${set.costume}  \n`;
 		}
 		if (typeof set.happiness === 'number' && set.happiness !== 255 && !isNaN(set.happiness)) {
 			text += `Happiness: ${set.happiness}  \n`;
@@ -346,6 +351,9 @@ class PSTeambuilder {
 		} else if (line.startsWith('Level: ')) {
 			line = line.slice(7);
 			set.level = +line;
+		} else if (line.startsWith('Costume: ')) {
+			line = line.slice(9);
+			set.costume = +line;
 		} else if (line.startsWith('Happiness: ')) {
 			line = line.slice(11);
 			set.happiness = +line;
@@ -390,6 +398,12 @@ class PSTeambuilder {
 		} else if (line.match(/^[A-Za-z]+ (N|n)ature/)) {
 			let natureIndex = line.indexOf(' Nature');
 			if (natureIndex === -1) natureIndex = line.indexOf(' nature');
+			if (natureIndex === -1) return;
+			line = line.substr(0, natureIndex);
+			if (line !== 'undefined') set.nature = line as NatureName;
+		} else if (line.match(/^[A-Za-z]+ (E|e)mblem/)) {
+			let natureIndex = line.indexOf(' Emblem');
+			if (natureIndex === -1) natureIndex = line.indexOf(' emblem');
 			if (natureIndex === -1) return;
 			line = line.substr(0, natureIndex);
 			if (line !== 'undefined') set.nature = line as NatureName;

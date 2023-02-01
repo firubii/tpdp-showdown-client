@@ -264,8 +264,8 @@
 		buf += '<button class="sortcol typesortcol' + (this.sortCol === 'type' ? ' cur' : '') + '" data-sort="type">Types</button>';
 		buf += '<button class="sortcol abilitysortcol' + (this.sortCol === 'ability' ? ' cur' : '') + '" data-sort="ability">Abilities</button>';
 		buf += '<button class="sortcol statsortcol' + (this.sortCol === 'hp' ? ' cur' : '') + '" data-sort="hp">HP</button>';
-		buf += '<button class="sortcol statsortcol' + (this.sortCol === 'atk' ? ' cur' : '') + '" data-sort="atk">Atk</button>';
-		buf += '<button class="sortcol statsortcol' + (this.sortCol === 'def' ? ' cur' : '') + '" data-sort="def">Def</button>';
+		buf += '<button class="sortcol statsortcol' + (this.sortCol === 'atk' ? ' cur' : '') + '" data-sort="atk">FoA</button>';
+		buf += '<button class="sortcol statsortcol' + (this.sortCol === 'def' ? ' cur' : '') + '" data-sort="def">FoD</button>';
 		if (this.engine.dex.gen >= 2) {
 			buf += '<button class="sortcol statsortcol' + (this.sortCol === 'spa' ? ' cur' : '') + '" data-sort="spa">SpA</button>';
 			buf += '<button class="sortcol statsortcol' + (this.sortCol === 'spd' ? ' cur' : '') + '" data-sort="spd">SpD</button>';
@@ -282,9 +282,10 @@
 		buf += '<button class="sortcol movenamesortcol' + (this.sortCol === 'name' ? ' cur' : '') + '" data-sort="name">Name</button>';
 		buf += '<button class="sortcol movetypesortcol' + (this.sortCol === 'type' ? ' cur' : '') + '" data-sort="type">Type</button>';
 		buf += '<button class="sortcol movetypesortcol' + (this.sortCol === 'category' ? ' cur' : '') + '" data-sort="category">Cat</button>';
+		buf += '<button class="sortcol classsortcol' + (this.sortCol === 'class' ? ' cur' : '') + '" data-sort="class">Class</button>';
 		buf += '<button class="sortcol powersortcol' + (this.sortCol === 'power' ? ' cur' : '') + '" data-sort="power">Pow</button>';
 		buf += '<button class="sortcol accuracysortcol' + (this.sortCol === 'accuracy' ? ' cur' : '') + '" data-sort="accuracy">Acc</button>';
-		buf += '<button class="sortcol ppsortcol' + (this.sortCol === 'pp' ? ' cur' : '') + '" data-sort="pp">PP</button>';
+		buf += '<button class="sortcol ppsortcol' + (this.sortCol === 'pp' ? ' cur' : '') + '" data-sort="pp">SP</button>';
 		buf += '</div></li>';
 		return buf;
 	};
@@ -376,8 +377,8 @@
 		// base stats
 		var stats = pokemon.baseStats;
 		buf += '<span class="col statcol"><em>HP</em><br />' + stats.hp + '</span> ';
-		buf += '<span class="col statcol"><em>Atk</em><br />' + stats.atk + '</span> ';
-		buf += '<span class="col statcol"><em>Def</em><br />' + stats.def + '</span> ';
+		buf += '<span class="col statcol"><em>FoA</em><br />' + stats.atk + '</span> ';
+		buf += '<span class="col statcol"><em>FoD</em><br />' + stats.def + '</span> ';
 		if (gen >= 2) {
 			buf += '<span class="col statcol"><em>SpA</em><br />' + stats.spa + '</span> ';
 			buf += '<span class="col statcol"><em>SpD</em><br />' + stats.spd + '</span> ';
@@ -447,8 +448,8 @@
 		// base stats
 		buf += '<span style="float:left;min-height:26px">';
 		buf += '<span class="col statcol"><em>HP</em><br />' + pokemon.baseStats.hp + '</span> ';
-		buf += '<span class="col statcol"><em>Atk</em><br />' + pokemon.baseStats.atk + '</span> ';
-		buf += '<span class="col statcol"><em>Def</em><br />' + pokemon.baseStats.def + '</span> ';
+		buf += '<span class="col statcol"><em>Foa</em><br />' + pokemon.baseStats.atk + '</span> ';
+		buf += '<span class="col statcol"><em>FoD</em><br />' + pokemon.baseStats.def + '</span> ';
 		buf += '<span class="col statcol"><em>SpA</em><br />' + pokemon.baseStats.spa + '</span> ';
 		buf += '<span class="col statcol"><em>SpD</em><br />' + pokemon.baseStats.spd + '</span> ';
 		buf += '<span class="col statcol"><em>Spe</em><br />' + pokemon.baseStats.spe + '</span> ';
@@ -560,11 +561,12 @@
 		buf += '</span> ';
 
 		// power, accuracy, pp
-		var pp = (move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
+		var pp = move.pp; //(move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
 		if (this.engine && this.engine.dex.gen < 3) pp = Math.min(61, pp);
+		buf += '<span class="col labelcol"><em>Class</em><br />' + (move.flags.contact ? 'BU' : 'EN') + '</span> ';
 		buf += '<span class="col labelcol">' + (move.category !== 'Status' ? ('<em>Power</em><br />' + (move.basePower || '&mdash;')) : '') + '</span> ';
 		buf += '<span class="col widelabelcol"><em>Accuracy</em><br />' + (move.accuracy && move.accuracy !== true ? move.accuracy + '%' : '&mdash;') + '</span> ';
-		buf += '<span class="col pplabelcol"><em>PP</em><br />' + pp + '</span> ';
+		buf += '<span class="col pplabelcol"><em>SP</em><br />' + pp + '</span> ';
 
 		// desc
 		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc) + '</span> ';
@@ -601,7 +603,7 @@
 		if (this.engine && this.engine.dex.gen < 3) pp = Math.min(61, pp);
 		buf += '<span class="col labelcol">' + (move.category !== 'Status' ? ('<em>Power</em><br />' + (move.basePower || '&mdash;')) : '') + '</span> ';
 		buf += '<span class="col widelabelcol"><em>Accuracy</em><br />' + (move.accuracy && move.accuracy !== true ? move.accuracy + '%' : '&mdash;') + '</span> ';
-		buf += '<span class="col pplabelcol"><em>PP</em><br />' + pp + '</span> ';
+		buf += '<span class="col pplabelcol"><em>SP</em><br />' + pp + '</span> ';
 
 		// desc
 		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';
@@ -638,7 +640,7 @@
 		// power, accuracy, pp
 		buf += '<span class="col labelcol">' + (move.category !== 'Status' ? ('<em>Power</em><br />' + (move.basePower || '&mdash;')) : '') + '</span> ';
 		buf += '<span class="col widelabelcol"><em>Accuracy</em><br />' + (move.accuracy && move.accuracy !== true ? move.accuracy + '%' : '&mdash;') + '</span> ';
-		buf += '<span class="col pplabelcol"><em>PP</em><br />' + (move.pp !== 1 ? move.pp * 8 / 5 : move.pp) + '</span> ';
+		buf += '<span class="col pplabelcol"><em>SP</em><br />' + move.pp /*(move.pp !== 1 ? move.pp * 8 / 5 : move.pp)*/ + '</span> ';
 
 		// desc
 		buf += '<span class="col movedesccol">' + BattleLog.escapeHTML(move.shortDesc || move.desc) + '</span> ';

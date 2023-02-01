@@ -2076,14 +2076,23 @@ a.ilink.yours {
 .status.psn, .status.tox {
 	background: #A4009A;
 }
-.status.par {
-	background: #9AA400;
+.status.par, .status.shk {
+	background: #FFCF5B;
 }
 .status.slp {
 	background: #AA77AA;
 }
 .status.frz {
 	background: #009AA4;
+}
+.status.stp {
+	background: #AFFFFA;
+}
+.status.weak, .status.weakheavy {
+	background: #82A7E5;
+}
+.status.dark, .status.dark {
+	background: #6E6E6E;
 }
 
 .movemenu button {
@@ -2103,6 +2112,12 @@ a.ilink.yours {
 	padding-top: 3px;
 	float: left;
 	font-size: 8pt;
+}
+.movemenu button small.effective {
+	padding-top: 4px;
+	float: left;
+	font-size: 7pt;
+	padding-left: 3px;
 }
 .movemenu button small.pp {
 	padding-top: 2px;
@@ -2683,6 +2698,7 @@ a.ilink.yours {
 }
 .setcell-sprite {
 	height: 82px;
+	width: 82px;
 	padding: 1px;
 }
 .setcell-pokemon {

@@ -169,6 +169,34 @@ interface TeambuilderSpriteData {
 	shiny?: boolean;
 }
 
+const PuppetCostumeNames = ['Normal', 'Alt. Color', 'Alt. Costume', 'Wedding'];
+const ExtendedCostumes: {[spriteid: string]: number} = {
+	benben: 1,
+	cirno: 1,
+	ellen: 1,
+	flandre: 1,
+	kasen: 1,
+	kogasa: 1,
+	komachi: 1,
+	magan: 1,
+	marisa: 1,
+	merry: 1,
+	miko: 1,
+	mima: 1,
+	murasa: 1,
+	reimu: 1,
+	remilia: 1,
+	seija: 1,
+	shinki: 1,
+	tojiko: 1,
+	utsuho: 1,
+	yukari: 1,
+	yumeko: 1,
+	yumemi: 1,
+	yuuka: 1,
+	yuyuko: 1,
+};
+
 const Dex = new class implements ModdedDex {
 	readonly gen = 9;
 	readonly modid = 'gen9' as ID;
@@ -180,12 +208,14 @@ const Dex = new class implements ModdedDex {
 	pokeballs: string[] | null = null;
 
 	resourcePrefix = (() => {
+		
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
 		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
 	})();
 
 	fxPrefix = (() => {
+		
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
 	})();
@@ -481,6 +511,7 @@ const Dex = new class implements ModdedDex {
 		noScale?: boolean,
 		mod?: string,
 		dynamax?: boolean,
+		costume?: number
 	} = {gen: 6}) {
 		const mechanicsGen = options.gen || 6;
 		let isDynamax = !!options.dynamax;
@@ -517,8 +548,10 @@ const Dex = new class implements ModdedDex {
 			shiny: options.shiny,
 		};
 		let name = species.spriteid;
+		let spriteNum = Dex.species.get(name).num;
 		let dir;
 		let facing;
+		let costume = options.costume ? options.costume : 0;
 		if (isFront) {
 			spriteData.isFrontSprite = true;
 			dir = '';
@@ -527,6 +560,8 @@ const Dex = new class implements ModdedDex {
 			dir = '-back';
 			facing = 'back';
 		}
+
+		name = spriteNum.toLocaleString('en-US', {minimumIntegerDigits: 3, useGrouping: false}) + '_' + costume.toLocaleString('en-US', {minimumIntegerDigits: 3, useGrouping: false});
 
 		// Decide which gen sprites to use.
 		//
@@ -543,18 +578,18 @@ const Dex = new class implements ModdedDex {
 		if (Dex.prefs('nopastgens')) graphicsGen = 6;
 		if (Dex.prefs('bwgfx') && graphicsGen >= 6) graphicsGen = 5;
 		spriteData.gen = Math.max(graphicsGen, Math.min(species.gen, 5));
-		const baseDir = ['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', ''][spriteData.gen];
+		const baseDir = /*['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', ''][spriteData.gen]*/ 'tpdp';
 
 		let animationData = null;
 		let miscData = null;
 		let speciesid = species.id;
 		if (species.isTotem) speciesid = toID(name);
-		if (baseDir === '' && window.BattlePokemonSprites) {
+		//if (baseDir === '' && window.BattlePokemonSprites) {
 			animationData = BattlePokemonSprites[speciesid];
-		}
-		if (baseDir === 'gen5' && window.BattlePokemonSpritesBW) {
+		//}
+		/*if (baseDir === 'gen5' && window.BattlePokemonSpritesBW) {
 			animationData = BattlePokemonSpritesBW[speciesid];
-		}
+		}*/
 		if (window.BattlePokemonSprites) miscData = BattlePokemonSprites[speciesid];
 		if (!miscData && window.BattlePokemonSpritesBW) miscData = BattlePokemonSpritesBW[speciesid];
 		if (!animationData) animationData = {};
@@ -622,15 +657,17 @@ const Dex = new class implements ModdedDex {
 
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
 		let allowAnim = !Dex.prefs('noanim') && !Dex.prefs('nogif');
-		if (allowAnim && spriteData.gen >= 6) spriteData.pixelated = false;
-		if (allowAnim && animationData[facing] && spriteData.gen >= 5) {
+		//if (allowAnim && spriteData.gen >= 6) spriteData.pixelated = false;
+		//if (allowAnim && animationData[facing] && spriteData.gen >= 5) {
 			if (facing.slice(-1) === 'f') name += '-f';
 			dir = baseDir + 'ani' + dir;
 
-			spriteData.w = animationData[facing].w;
-			spriteData.h = animationData[facing].h;
-			spriteData.url += dir + '/' + name + '.gif';
-		} else {
+			//spriteData.w = animationData[facing].w;
+			//spriteData.h = animationData[facing].h;
+			spriteData.w = 128;
+			spriteData.h = 128;
+			spriteData.url += dir + '/' + (pokemon === 'substitute' ? 'substitute.png' : name + '.gif');
+		/*} else {
 			// There is no entry or enough data in pokedex-mini.js
 			// Handle these in case-by-case basis; either using BW sprites or matching the played gen.
 			dir = (baseDir || 'gen5') + dir;
@@ -642,9 +679,9 @@ const Dex = new class implements ModdedDex {
 			}
 
 			spriteData.url += dir + '/' + name + '.png';
-		}
+		}*/
 
-		if (!options.noScale) {
+		/*if (!options.noScale) {
 			if (graphicsGen > 4) {
 				// no scaling
 			} else if (spriteData.isFrontSprite) {
@@ -667,7 +704,7 @@ const Dex = new class implements ModdedDex {
 			spriteData.w *= 1.5;
 			spriteData.h *= 1.5;
 			spriteData.y += -11;
-		}
+		}*/
 
 		return spriteData;
 	}
@@ -680,7 +717,7 @@ const Dex = new class implements ModdedDex {
 			num = BattlePokedex[id].num;
 		}
 		if (num < 0) num = 0;
-		if (num > 1010) num = 0;
+		if (num > 255) num = 0;
 
 		if (window.BattlePokemonIconIndexes?.[id]) {
 			num = BattlePokemonIconIndexes[id];
@@ -717,14 +754,16 @@ const Dex = new class implements ModdedDex {
 		// @ts-ignore
 		if (pokemon?.species) id = toID(pokemon.species);
 		// @ts-ignore
-		if (pokemon?.volatiles?.formechange && !pokemon.volatiles.transform) {
+		/*if (pokemon?.volatiles?.formechange && !pokemon.volatiles.transform) {
 			// @ts-ignore
 			id = toID(pokemon.volatiles.formechange[1]);
-		}
+		}*/
+		// @ts-ignore
+		if (this.species.get(id).changesFrom) id = toID(this.species.get(id).changesFrom);
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
-		let top = Math.floor(num / 12) * 30;
-		let left = (num % 12) * 40;
+		let top = Math.floor(num / 16) * 40 + 5;
+		let left = (num % 16) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v10) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
@@ -738,11 +777,12 @@ const Dex = new class implements ModdedDex {
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
 		const spriteData: TeambuilderSpriteData = {
-			spriteid,
+			spriteid: species.num.toLocaleString('en-US', {minimumIntegerDigits: 3, useGrouping: false}) + '_' + (pokemon.costume ? pokemon.costume.toLocaleString('en-US', {minimumIntegerDigits: 3, useGrouping: false}) : "000"),
 			spriteDir: 'sprites/dex',
-			x: -2,
-			y: -3,
+			x: -8,
+			y: -42
 		};
+		return spriteData;
 		if (pokemon.shiny) spriteData.shiny = true;
 		if (Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
@@ -780,7 +820,8 @@ const Dex = new class implements ModdedDex {
 		if (!pokemon) return '';
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
-		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
+		//return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
+		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
 	}
 
 	getItemIcon(item: any) {
@@ -825,6 +866,77 @@ const Dex = new class implements ModdedDex {
 			this.pokeballs.push(data.name);
 		}
 		return this.pokeballs;
+	}
+
+	getPuppetCostumes(pokemon: any, extended: boolean = false): string[] {
+		let cos:string[] = [];
+		for (const cosName of PuppetCostumeNames)
+			cos.push(cosName);
+
+		if (extended) {
+			let species = Dex.species.get(pokemon.species);
+			let spriteid = pokemon.species.split(' ')[1].toLowerCase(); //species.spriteid;
+			//console.log('Extended Costumes for ' + spriteid + ': ' + ExtendedCostumes[spriteid]);
+			if (species && ExtendedCostumes[spriteid]) {
+				for (var i = 0; i < ExtendedCostumes[spriteid]; i++) {
+					cos.push('Extended Alt. ' + (i + 1));
+				}
+			}
+		}
+		return cos;
+	}
+
+	puppetCostumeToID(pokemon: any, costume: string): number {
+		let cos = this.getPuppetCostumes(pokemon, true);
+		for (var i = 0; i < cos.length; i++) {
+			if (cos[i] === costume) {
+				return i;
+			}
+		}
+
+		return 0;
+	}
+
+	getImmunity(
+		source: {type: string} | string,
+		target: {getTypes: () => string[]} | {types: string[]} | string[] | string
+	): boolean {
+		const sourceType: string = typeof source !== 'string' ? source.type : source;
+		// @ts-ignore
+		const targetTyping: string[] | string = target.getTypes?.() || target.types || target;
+		if (Array.isArray(targetTyping)) {
+			for (const type of targetTyping) {
+				if (!this.getImmunity(sourceType, type)) return false;
+			}
+			return true;
+		}
+		const typeData = this.types.get(targetTyping);
+		if (typeData && typeData.damageTaken && typeData.damageTaken[sourceType] === 3) return false;
+		return true;
+	}
+
+	getEffectiveness(
+		source: {type: string} | string,
+		target: {getTypes: () => string[]} | {types: string[]} | string[] | string
+	): number {
+		const sourceType: string = typeof source !== 'string' ? source.type : source;
+		// @ts-ignore
+		const targetTyping: string[] | string = target.getTypes?.() || target.types || target;
+		let totalTypeMod = 0;
+		if (Array.isArray(targetTyping)) {
+			for (const type of targetTyping) {
+				totalTypeMod += this.getEffectiveness(sourceType, type);
+			}
+			return totalTypeMod;
+		}
+		const typeData = this.types.get(targetTyping);
+		if (!typeData || !typeData.damageTaken) return 0;
+		switch (typeData.damageTaken[sourceType]) {
+		case 1: return 1; // super-effective
+		case 2: return -1; // resist
+		// in case of weird situations like Gravity, immunity is handled elsewhere
+		default: return 0;
+		}
 	}
 };
 

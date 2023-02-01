@@ -81,6 +81,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	level = 100;
 	gender: GenderName = 'N';
 	shiny = false;
+	costume = 0;
 
 	hpcolor: HPColor = 'g';
 	moves: string[] = [];
@@ -93,7 +94,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	terastallized: string | '' = '';
 
 	boosts: {[stat: string]: number} = {};
-	status: StatusName | 'tox' | '' | '???' = '';
+	status: StatusName[] = [];
 	statusStage = 0;
 	volatiles: {[effectid: string]: EffectState} = {};
 	turnstatuses: {[effectid: string]: EffectState} = {};
@@ -119,6 +120,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		this.ident = data.ident;
 		this.terastallized = data.terastallized || '';
 		this.searchid = data.searchid;
+		this.costume = data.costume;
 
 		this.sprite = side.battle.scene.addPokemonSprite(this);
 	}
@@ -547,7 +549,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		this.clearVolatile();
 		this.hp = this.maxhp;
 		this.fainted = false;
-		this.status = '';
+		this.status = [];
 		this.moveTrack = [];
 		this.name = this.name || this.speciesForme;
 	}
@@ -805,7 +807,7 @@ export class Side {
 					if (illusionFound) {
 						illusionFound.fainted = true;
 						illusionFound.hp = 0;
-						illusionFound.status = '';
+						illusionFound.status = [];
 					}
 				}
 				this.pokemon.splice(toRemove, 1);
@@ -863,7 +865,7 @@ export class Side {
 			// technically we also know its status but only at the end of the turn, not here
 			oldpokemon.fainted = false;
 			oldpokemon.hp = oldpokemon.maxhp;
-			oldpokemon.status = '???';
+			oldpokemon.status = [];
 			oldpokemon.terastallized = '';
 		}
 		this.active[slot] = pokemon;
@@ -959,12 +961,13 @@ export interface PokemonDetails {
 	ident: string;
 	terastallized: string;
 	searchid: string;
+	costume: number;
 }
 export interface PokemonHealth {
 	hp: number;
 	maxhp: number;
 	hpcolor: HPColor | '';
-	status: StatusName | 'tox' | '' | '???';
+	status: StatusName[];
 	fainted?: boolean;
 }
 export interface ServerPokemon extends PokemonDetails, PokemonHealth {
@@ -1419,7 +1422,7 @@ export class Battle {
 		}
 		for (const poke of [...this.nearSide.active, ...this.farSide.active]) {
 			if (poke) {
-				if (poke.status === 'tox') poke.statusData.toxicTurns++;
+				if (poke.status.includes('tox')) poke.statusData.toxicTurns++;
 				poke.clearTurnstatuses();
 			}
 		}
@@ -1732,7 +1735,7 @@ export class Battle {
 					const {siden} = this.parsePokemonId(args[1]);
 					const side = this.sides[siden];
 					poke.fainted = false;
-					poke.status = '';
+					poke.status = [];
 					this.scene.updateSidebar(side);
 					break;
 				}
@@ -2080,7 +2083,7 @@ export class Battle {
 			let poke = this.getPokemon(args[1])!;
 			let effect = Dex.getEffect(kwArgs.from);
 			let ofpoke = this.getPokemon(kwArgs.of) || poke;
-			poke.status = args[2] as StatusName;
+			poke.status.push(args[2] as StatusName);
 			this.activateAbility(ofpoke || poke, effect);
 			if (effect.effectType === 'Item') {
 				ofpoke.item = effect.name;
@@ -2138,7 +2141,7 @@ export class Battle {
 				}
 			}
 			if (poke) {
-				poke.status = '';
+				poke.status = poke.status.filter(x => x !== args[2]);
 				switch (args[2]) {
 				case 'brn':
 					this.scene.resultAnim(poke, 'Burn cured', 'good');
@@ -2170,7 +2173,7 @@ export class Battle {
 		case '-cureteam': { // For old gens when the whole team was always cured
 			let poke = this.getPokemon(args[1])!;
 			for (const target of poke.side.pokemon) {
-				target.status = '';
+				target.status = [];
 				this.scene.updateStatbarIfExists(target);
 			}
 
@@ -3108,9 +3111,12 @@ export class Battle {
 		output.gender = '';
 		output.ident = (!isTeamPreview ? pokemonid : '');
 		output.searchid = (!isTeamPreview ? `${pokemonid}|${details}` : '');
+		//console.log(details);
 		let splitDetails = details.split(', ');
 		if (splitDetails[splitDetails.length - 1].startsWith('tera:')) {
 			output.terastallized = splitDetails[splitDetails.length - 1].slice(5);
+		if (splitDetails[splitDetails.length - 1].startsWith('C')) {
+			output.costume = parseInt(splitDetails[splitDetails.length - 1].substr(1));
 			splitDetails.pop();
 		}
 		if (splitDetails[splitDetails.length - 1] === 'shiny') {
@@ -3155,15 +3161,16 @@ export class Battle {
 		}
 
 		// status parse
-		if (!status) {
-			output.status = '';
-		} else if (status === 'par' || status === 'brn' || status === 'slp' || status === 'frz' || status === 'tox') {
-			output.status = status;
-		} else if (status === 'psn' && output.status !== 'tox') {
-			output.status = status;
-		} else if (status === 'fnt') {
+		output.status = [];
+		if (status === 'fnt') {
 			output.hp = 0;
 			output.fainted = true;
+		}
+		else if (status) {
+			let statuses = status.split(',');
+			for (let i = 0; i < statuses.length; i++) {
+				output.status.push(statuses[i] as StatusName);
+			}
 		}
 		return output;
 	}

@@ -12,6 +12,10 @@
 import {AnimTable, BattleOtherAnims} from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	//TOUHOU
+	//TODO - all of them
+
+	//POKEMON
 	taunt: {
 		anim(scene, [attacker, defender]) {
 			BattleOtherAnims.dance.anim(scene, [attacker, defender]);
@@ -35055,7 +35059,7 @@ BattleMoveAnims['gmaxdrumsolo'] = BattleMoveAnims['bloomdoom'];
 BattleMoveAnims['maxquake'] = BattleMoveAnims['tectonicrage'];
 BattleMoveAnims['gmaxsandblast'] = BattleMoveAnims['tectonicrage'];
 BattleMoveAnims['maxhailstorm'] = BattleMoveAnims['subzeroslammer'];
-BattleMoveAnims['gmaxresonance'] = BattleMoveAnims['subzeroslammer'];
+//BattleMoveAnims['gmaxresonance'] = BattleMoveAnims['subzeroslammer'];
 BattleMoveAnims['maxstrike'] = BattleMoveAnims['breakneckblitz'];
 BattleMoveAnims['gmaxcuddle'] = BattleMoveAnims['breakneckblitz'];
 BattleMoveAnims['gmaxreplenish'] = BattleMoveAnims['breakneckblitz'];
